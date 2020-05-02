@@ -45,10 +45,10 @@
              echo "<td>",$row['CanId'],"</td>\n";
              echo "<td>",$row['Name'],"</td>\n";
              echo "<td>",$row['SensorTypeId'],"</td>\n";
-             echo "</tr>\n ";
+             echo "</tr>\n ";s
           }
         }
-      	}
+      }
 
 //------------------------End Of Function Definition------------------
       if (mysqli_connect_errno())
@@ -68,7 +68,6 @@
      ini_set('display_errors', 1);
      ini_set('display_startup_errors', 1);
      error_reporting(E_ALL);
-
    ?>
 
 
