@@ -18,6 +18,8 @@ var textColour = "green";
 var padding = 40;
 
 function redraw() {
+	d3.selectAll("svg > *").remove();
+	
 	// grab new chart size
 	var w = chartDiv.clientWidth;
 	var h = chartDiv.clientHeight;
