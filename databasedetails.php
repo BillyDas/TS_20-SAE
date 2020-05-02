@@ -1,7 +1,7 @@
 <?php
 //Database Login Detials
 //$host = "ts20.billydasdev.com";
-$host = "localhost";
+$host = "ts20.billydasdev.com";
 $user = "ts20";
 $pwd = "ts20";
 $sql_db = "ts20";
