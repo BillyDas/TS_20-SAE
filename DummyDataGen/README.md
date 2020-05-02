@@ -1,19 +1,23 @@
 # DummyDataGen
 
-DummyDataGen generates SQL statements to populate our database tables with dummy data.
+`smarterdummygen.py` generates and directly populates our database tables with dummy data.  
+The kind of Sensors, Types, Units, and the Data being inserted can be modified within the python script as per the internal documentation.  
+**DO NOT PUBLICISE THIS SCRIPT, IT CONTAINS AN UNENCRYPTED CONNECTION STRING.**  
+**DO NOT RUN THIS SCRIPT IF YOU DO NOT WANT TO OVERWRITE THE DATABASE'S CURRENT DATA.**  
+
+`dummygen.py` is not needed - it is an older version which creates SQL statements and prints them to output `.txt` files.
 
 ## Usage
 
-Run:
-
+Install Dependencies:
 ```bash
-python dummygen.py
+python -m pip install mysql-connector
 ```
 
-`output.txt` and `output2.txt` will be produced.
+Run:
+```bash
+python smarterdummygen.py
+```
 
-## To-Do
 
-- This looks like something a 3rd grader could've written, I need to fix it so it's actually modifiable and readable...
-- Actually insert to the database instead of just generating `.txt` files.
 
