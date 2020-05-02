@@ -6,7 +6,7 @@ function init() {
 	// create svg
 	var svg = d3.select(chartDiv).append("svg");
 
-	d3.json("/data/SmallSensorData.json").then(function( data ) {
+	d3.json("data/SmallSensorData.json").then(function( data ) {
 		data.forEach( function(d) {
 			d.UTCTimestamp = Date.parse(d.UTCTimestamp);
 			d.Data = parseInt(d.Data);
