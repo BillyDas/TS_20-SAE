@@ -58,14 +58,16 @@
          exit();
 
      } else {
-       $query = "SELECT * FROM ts20";
+       $query = "SELECT * FROM sensors";
        $results = mysqli_query($conn, $query) or trigger_error("Query Failed! SQL: $query - Error: ".mysqli_error($conn), E_USER_ERROR);
        printdatapre();
        printdata($results);
        printdatapost();
-
      }
 
+     ini_set('display_errors', 1);
+     ini_set('display_startup_errors', 1);
+     error_reporting(E_ALL);
 
    ?>
 
