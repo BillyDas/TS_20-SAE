@@ -6,10 +6,7 @@
         <link rel="stylesheet" type="text/css" media="screen" href="main2.css" />
     </head>
     <body>
-        <div id="navbar">
-            <p>TS FSAE Data App</p>
-            <a href="layout.php"><img src="cronch.png" alt="cronch" id="pic"><span id="inlinespan">Custom</span></a>
-        </div>
+        <?php include "navbarContents.php" ?>
         <div id="main">
             <h1>Custom Visualisation</h1>
             <img src="cronch.png" alt="cronch" id="pic">
@@ -30,9 +27,9 @@
                         {
                             while($row = $result->fetch_assoc())
                             {
-                                //checkbox for each sensor follows format - (name, SensorTypeId) = id, (value) = name.
-                                echo('<input type="checkbox" id="'.$row["SensorTypeId"].'" name ="'.$row["SensorTypeId"].'>
-                                    <label for="'.$row["SensorTypeId"].'">'.$row["Name"].'</label><br>');
+                                //radio for each sensor follows format - (name, SensorTypeId) = id, (value) = name.
+                                echo('<input type="radio" id="'.$row["SensorTypeId"].'" value ="'.$row["SensorTypeId"].'" name ="xAx">
+                                    <label for="xAx">'.$row["Name"].'</label><br>');
                             }
                         }
                     ?>
@@ -53,13 +50,14 @@
                         {
                             while($row = $result->fetch_assoc())
                             {
-                                //checkbox for each sensor follows format - (name, SensorTypeId) = id, (value) = name.
-                                echo('<input type="checkbox" id="'.$row["SensorTypeId"].'" name ="'.$row["SensorTypeId"].'>
-                                    <label for="'.$row["SensorTypeId"].'">'.$row["Name"].'</label><br>');
+                                //radio for each sensor follows format - (name, SensorTypeId) = id, (value) = name.
+                                echo('<input type="radio" id="'.$row["SensorTypeId"].'" value ="'.$row["SensorTypeId"].'" name ="yAx">
+                                    <label for="yAx">'.$row["Name"].'</label><br>');
                             }
                         }
                     ?>
                 </fieldset>
+                <input type="submit" id="button" value="Update">
             </form>
         </div>
     </body>
