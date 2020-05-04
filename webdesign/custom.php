@@ -4,13 +4,14 @@
         <meta charset="utf-8" />
         <title>SAE Data App</title>
         <link rel="stylesheet" type="text/css" media="screen" href="main2.css" />
+        <script src="collectAxisSelection.js"></script>
     </head>
     <body>
         <?php include "navbarContents.php" ?>
         <div id="main">
             <h1>Custom Visualisation</h1>
             <img src="cronch.png" alt="cronch" id="pic">
-            <form>
+            <form onsubmit="return false;">
                 <fieldset>
                     <legend>X Axis</legend>
                     <?php
@@ -28,7 +29,7 @@
                             while($row = $result->fetch_assoc())
                             {
                                 //radio for each sensor follows format - (name, SensorTypeId) = id, (value) = name.
-                                echo('<input type="radio" id="'.$row["SensorTypeId"].'" value ="'.$row["SensorTypeId"].'" name ="xAx">
+                                echo('<input type="radio" id="'.$row["SensorTypeId"].'" value ="'.$row["SensorTypeId"].'" name ="xAx" class="xAx">
                                     <label for="xAx">'.$row["Name"].'</label><br>');
                             }
                         }
@@ -51,7 +52,7 @@
                             while($row = $result->fetch_assoc())
                             {
                                 //radio for each sensor follows format - (name, SensorTypeId) = id, (value) = name.
-                                echo('<input type="radio" id="'.$row["SensorTypeId"].'" value ="'.$row["SensorTypeId"].'" name ="yAx">
+                                echo('<input type="radio" id="'.$row["SensorTypeId"].'" value ="'.$row["SensorTypeId"].'" name ="yAx" class="yAx">
                                     <label for="yAx">'.$row["Name"].'</label><br>');
                             }
                         }
