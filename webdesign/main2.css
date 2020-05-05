@@ -51,6 +51,10 @@ body {
     margin-right: 0.5em;
 }
 
+#navbar p.category {
+	padding: 0 0 0 0.5em;
+}
+
 #main {
     margin-left: 17%;
 }
