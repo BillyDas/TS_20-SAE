@@ -8,7 +8,7 @@ tick box in general settings in assetto corsa
 
 drive
 
-dummydata.txt is generated
-paste into phpmyadmin
+dummydata.txt is generated in same folder!
+paste contents into phpmyadmin (yes its janky)
 
 will add automatic insert functionality later :)
