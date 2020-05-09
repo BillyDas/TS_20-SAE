@@ -7,7 +7,7 @@ function init() {
 	var svg = d3.select(chartDiv).append("svg");
 
 	// load the dataset and then draw
-	d3.json("data/SensorData.json").then(function( data ) {
+	d3.json("data/SmallSensorData.json").then(function( data ) {
 		// data conversion for time and data
 		data.forEach( function(d) {
 			d.UTCTimestamp = Date.parse(d.UTCTimestamp);
@@ -82,10 +82,11 @@ function lineChart( data, svg ) {
 		.call(yAxis);
 
 	// create group names
-	var res = sumstat.map(function(d){ return d.key })
+	var sensorNames = sumstat.map(function(d){ return d.key })
+
 	// create scale to map sensors to individual colour
 	var color = d3.scaleOrdinal()
-		.domain(res)
+		.domain(sensorNames)
 		.range(d3.schemeSet3);
 
 	// add sensors as lines to the svg
@@ -103,6 +104,26 @@ function lineChart( data, svg ) {
 		    		.y(function(d) { return yScale(d.Data); })
 		    		(d.values)
 	    	});
+
+	svg.selectAll("legenddots")
+		.data(sensorNames)
+		.enter()
+			.append("circle")
+			.attr("cx", w - 100)
+			.attr("cy", function(d,i){ return 100 + i*25})
+			.attr("r", 7)
+			.style("fill", function(d){ return color(d)})
+
+	svg.selectAll("legendnames")
+		.data(sensorNames)
+		.enter()
+		.append("text")
+			.attr("x", w - 100)
+			.attr("y", function(d,i){ return 100 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
+			.style("fill", function(d){ return color(d)})
+			.text(function(d){ return d})
+			.attr("text-anchor", "left")
+			.style("alignment-baseline", "middle")
 }
 
 // run init on window load
