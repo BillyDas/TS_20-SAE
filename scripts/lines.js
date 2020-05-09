@@ -7,11 +7,11 @@ function init() {
 	var svg = d3.select(chartDiv).append("svg");
 
 	// load the dataset and then draw
-	d3.json("data/ClampedSensorData.json").then(function( data ) {
+	d3.json("data/AssettoSensorData.json").then(function( data ) {
 		// data conversion for time and data
 		data.forEach( function(d) {
 			d.UTCTimestamp = Date.parse(d.UTCTimestamp);
-			d.Data = parseInt(d.Data);
+			d.Data = parseFloat(d.Data);
 		} )
 
 		// draw line chart initially
