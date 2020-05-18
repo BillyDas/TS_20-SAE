@@ -70,8 +70,6 @@ function lineChart( data, svg ) {
 			.nice();
 	}
 
-
-
     // create x axis labels
     xAxisTicks = w / 100;
 	var xAxis = d3.axisBottom()
@@ -113,8 +111,6 @@ function lineChart( data, svg ) {
 			.nice();
 	}
 
-
-    
     // create y axis labels
     yAxisTicks = h / 100;
     var yAxis = d3.axisLeft()
@@ -196,7 +192,6 @@ function focusChart(data, svg, focus) {
 	var margin = {top: 20, right: 20, bottom: 30, left: 40}
 
 	var w = chartDiv.clientWidth;
-
 
 	// group data based on CanId
 	var sumstat = d3.nest()
