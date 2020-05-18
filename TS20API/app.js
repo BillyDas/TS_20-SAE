@@ -90,6 +90,97 @@ app.post('/', function (req, res) {
   }
 });
 
+//datavis method route
+app.get('/datavis', function (req, res) {
+  var errors = false;
+
+  //check parameters and autofill if needed or throw 400
+  var maxResults = req.query.max;
+  if (maxResults == null || !Number.isInteger(Number(maxResults))){
+    maxResults = 10;
+  }
+
+var WhereStmts = [];
+
+  var IDWhere = "";
+  var rawSensorID = req.query.canId;
+  if (rawSensorID != null){
+    var sensorIDs = JSON.parse(rawSensorID);
+    if (sensorIDs != null){
+      IDWhere = "SensorData.CanId IN (";
+      for(var i = 0; i < sensorIDs.length; i++){
+        IDWhere += "'" + sensorIDs[i] + "'";
+        if (i != sensorIDs.length - 1){
+          IDWhere += ","
+        }
+      }
+      IDWhere += ")";
+      WhereStmts.push(IDWhere);
+    }
+  }
+
+  var startTime = req.query.startTime;
+  if (startTime != null){
+    WhereStmts.push(`SensorData.UTCTimestamp >= ${startTime}`);
+  }
+
+  var endTime = req.query.endTime;
+  if (endTime != null){
+    WhereStmts.push(`SensorData.UTCTimestamp <= ${endTime}`);
+  }
+
+  var WhereStatement = "";
+  if (WhereStmts.length > 0){
+    WhereStatement = "WHERE "
+    WhereStmts.forEach(function(stmt, index, arr) {
+      WhereStatement += stmt
+      if(index != arr.length - 1){
+        WhereStatement += " AND "
+      }
+    });
+  }
+
+  try {
+    //setup MySQL Connection
+    var connection = mysql.createConnection({
+      host: 'localhost',
+      user: 'ts20',
+      password: 'ts20',
+      database: 'ts20'
+    });
+    //Open MySQL Connection to push data to DB
+    connection.connect();    
+    //Set up the query string to get data from the database
+    //var queryStr = `SELECT CanId, Data, UTCTimestamp FROM SensorData LIMIT ${maxResults}`;
+    var queryStr = `SELECT SensorData.UTCTimestamp, SensorData.CanId, SensorData.Data 
+    FROM SensorData 
+    ${WhereStatement}
+    ORDER BY SensorData.UTCTimestamp DESC
+    LIMIT ${maxResults}`;  
+    //Add Record to DB in SensorData Table
+    connection.query(queryStr, function (err, result, fields) {
+      //if an error occurs catch it and log to the console.
+      if (err) {
+        console.log(err);
+        errors = true;
+      }
+      res.type('json');
+      res.status(200);
+      res.json(result);
+    });
+    //Close MySQL Connection
+    connection.end();
+    //catch any errors from adding the data to the database and opening the connection to the db
+  } catch (ex) {
+    console.log(ex);
+    errors = true;
+  }
+  //if there were no errors respond with a 200 OK status
+  if (errors) {
+    res.status(500).send("Error Occurred Querying DB\n");
+  }
+});
+
 //Start the server
 app.listen(port);
 console.log(`TS20API listening on port ${port}`);
