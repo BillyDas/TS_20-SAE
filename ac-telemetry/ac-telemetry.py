@@ -1,3 +1,8 @@
+#############################################################
+#   Asetto Corsa Telemetry to CAN v1.0.0
+#   Author: Baylin Ferguson
+#   Description: This software gathers the Telemetry from AC via UDP and pushes to the can bus
+#############################################################
 import socket
 import logging
 import struct
