@@ -2,11 +2,12 @@ import socket
 import logging
 import struct
 import can
+import json
 
 # Settings
 acIP = "10.0.0.66"
 acPort = 9996
-logLevel = logging.DEBUG
+logLevel = logging.INFO
 
 # AC PACKET CONSTANTS
 HANDSHAKE = 0
@@ -37,6 +38,13 @@ def can_send(can_id, data):
     except can.CanError:
         print("Error Sending Message on CAN bus")
         return True
+
+# Read JSON config file
+def getConfig():
+    json_file = open("ac-telemetry-config.json")
+    config = json.load(json_file)
+    json_file.close()
+    return config['sensors']
 
 # Send UDP Packet to Asetto Corsa Server
 def ac_send(op):
@@ -69,37 +77,17 @@ def handleHandshakeMessage(msg, addr):
 def handleSubscribeUpdateMessage(msg, addr):
     logging.info("Recieved Subscribe Update Message")
     offset = 4
-    speedKmh = readFloatLE(msg, offset * 2)
-    speedMph = readFloatLE(msg, offset * 3)
-    speedMs = readFloatLE(msg, offset * 4)
-    accG_vertical = readFloatLE(msg, offset * 7)
-    accG_horizontal = readFloatLE(msg, offset * 8)
-    accG_frontal = readFloatLE(msg, offset * 9)
-    gas = readFloatLE(msg, offset * 14)
-    brake = readFloatLE(msg, offset * 15)
-    clutch = readFloatLE(msg, offset * 16)
-    engineRPM = readFloatLE(msg, offset * 17)
-    steer = readFloatLE(msg, offset * 18)
-    cgHeight = readFloatLE(msg, offset * 20)
-    wheelAngularSpeed = readFloatArr(msg, offset * 21, 4)
-    slipAngle = readFloatArr(msg, offset * 25, 4)
-    slipAngle_ContactPatch = readFloatArr(msg, offset * 29, 4)
-    slipRatio = readFloatArr(msg, offset * 33, 4)
-    tyreSlip = readFloatArr(msg, offset * 37, 4)
-    ndSlip = readFloatArr(msg, offset * 41, 4)
-    load = readFloatArr(msg, offset * 45, 4)
-    Dy = readFloatArr(msg, offset * 49, 4)
-    Mz = readFloatArr(msg, offset * 53, 4)
-    camberRAD = readFloatArr(msg, offset * 61, 4)
-    tyreRadius = readFloatArr(msg, offset * 65, 4)
-    tyreLoadRadius = readFloatArr(msg, offset * 69, 4)
-    suspensionHeight = readFloatArr(msg, offset * 73, 4)
-    carCoordinates = readFloatArr(msg, offset * 79, 3)
-
-    logging.debug("Speed Kmh: %f", speedKmh)
-    speedMsg = struct.pack("<f", speedKmh)
-    errors = can_send(0x3CB, speedMsg)
-    
+    config = getConfig()
+    for sensor in config:
+        if (sensor['numVals'] == 1):
+            sensorData = readFloatLE(msg, offset * sensor['offset'])
+            canMsg = struct.pack("<f", sensorData)
+            errors = can_send(sensor['offset'], canMsg)
+        else:
+            sensorData = readFloatArr(msg, offset * sensor['offset'], sensor['numVals'])
+            for i in range(0, sensor['numVals']):
+                canMsg = struct.pack("<f", sensorData[i])
+                errors = can_send(sensor['offset'] + i, canMsg)
     
 # Main 
 while True:        
