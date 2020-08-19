@@ -291,7 +291,7 @@ app.get('/desc', function (req, res) {
       //Open MySQL Connection to pull data from DB
       connection.connect();
       //Set up the query string to get data from the database
-      var queryStr = `SELECT Sensors.CanId, Sensors.Name, Sensors.Description, SensorUnit.UnitName, SensorUnit.UnitMetric
+      var queryStr = `SELECT Sensors.CanId, Sensors.Name, SensorType.Description, SensorUnit.UnitName, SensorUnit.UnitMetric
       FROM Sensors
       INNER JOIN SensorType ON SensorType.SensorTypeId=Sensors.SensorTypeId
       INNER JOIN SensorUnit ON SensorUnit.UnitId=SensorType.UnitId 
