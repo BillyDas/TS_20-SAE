@@ -1,4 +1,4 @@
-todo: this readme...
+<H1>THIS IS NOW OUTDATED PLEASE USE AC-TELEMETRY UDP SERVER!</H1>
 
 create folder called SAE in asseto corsa install location e.g.:
 D:\SteamLibrary\steamapps\common\assettocorsa\apps\python\SAE
