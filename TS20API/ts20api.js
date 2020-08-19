@@ -295,9 +295,7 @@ app.get('/desc', function (req, res) {
       FROM Sensors
       INNER JOIN SensorType ON SensorType.SensorTypeId=Sensors.SensorTypeId
       INNER JOIN SensorUnit ON SensorUnit.UnitId=SensorType.UnitId 
-      ${IDWhere}
-      ORDER BY SensorData.UTCTimestamp DESC
-      LIMIT ${maxResults}`;
+      ${IDWhere}`;
       //Add Record to DB in SensorData Table
       connection.query(queryStr, function (err, result, fields) {
         //if an error occurs catch it and log to the console.
