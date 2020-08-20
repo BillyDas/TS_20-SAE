@@ -9,7 +9,11 @@
 //Set up app
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const port = 3000;
+
+//Setup the API to use the CORS header
+app.use(cors())
 
 //Set up required packages
 //body parser - required to pull POST params into variables.
