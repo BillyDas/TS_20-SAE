@@ -1,6 +1,9 @@
+var persistentSelection = null;
+var persistentViewBoxWidth = null;
+var ratio = null;
 
 var chartDiv = document.getElementById("chart");
-var focusDiv = document.getElementById("focus")
+var focusDiv = document.getElementById("focus");
 var padding = 100;
 
 var minX, maxX, minY, maxY = null
@@ -23,9 +26,12 @@ function init() {
 		lineChart( data, svg );
 		focusChart( data, svg, focus );
 
+		
+
 		// add listener to draw on resize
 		window.addEventListener("resize", function() {
-				lineChart( data, svg );
+			lineChart( data, svg );
+			focusChart( data, svg, focus );
 		});
 	})
 	.catch(error => {
@@ -59,7 +65,7 @@ function lineChart( data, svg ) {
 		xScale = d3.scaleTime()
 			.domain([minX, maxX])
 			.range([padding, w - padding])
-			.nice();
+			//.nice();
 	}
 	else
 	{
@@ -67,7 +73,7 @@ function lineChart( data, svg ) {
 		xScale = d3.scaleTime()
 			.domain(d3.extent(data, function(d) { return d.UTCTimestamp; }))
 			.range([padding, w - padding])
-			.nice();
+			//.nice();
 	}
 
     // create x axis labels
@@ -140,6 +146,15 @@ function lineChart( data, svg ) {
 		.domain(sensorNames)
 		.range(d3.schemeCategory10);
 
+	svg.append("clipPath")
+		.attr("id", "chartClip")
+		.append("rect")
+			.attr("x", 0 + padding)
+			.attr("y", 0)
+			.attr("width", chartDiv.clientWidth - (2 * padding))
+			.attr("height", chartDiv.clientHeight)
+			.attr("fill", "#ccffff");
+
 	// add sensors as lines to the svg
 	svg.selectAll(".line")
 		.data(sumstat)
@@ -154,7 +169,8 @@ function lineChart( data, svg ) {
 		    		.x(function(d) { return xScale(d.UTCTimestamp); })
 		    		.y(function(d) { return yScale(d.Data); })
 		    		(d.values)
-	    	});
+			})
+			.attr("clip-path", "url(#chartClip)");
 
 	// add dots for the legend
 	svg.selectAll("legenddots")
@@ -187,7 +203,11 @@ function lineChart( data, svg ) {
 }
 
 function focusChart(data, svg, focus) {
+	// clear canvas
+	d3.selectAll("#focus svg > *").remove();
+
 	var focusHeight = 100
+	var focusPadding = 20
 
 	var margin = {top: 20, right: 20, bottom: 30, left: 40}
 
@@ -200,21 +220,21 @@ function focusChart(data, svg, focus) {
 
 	// configure focus view size
 	focus
-		.attr("viewBox", [0, 0, w, focusHeight])
+		.attr("viewBox", [0, 0, w, focusHeight + focusPadding])
 		.style("display", "block")
 
 	// focus shit
 	area = (x, y) => d3.area()
 		.defined(d => !isNaN(d.value))
 		.x(d => x(d.date))
-		.y0(y(0))
+		.y0(y(0)) // what the fuck? did i write this?
 		.y1(d => y(d.value))
 
 	// set x axis to scale based on times
 	var xScale = d3.scaleTime()
 		.domain(d3.extent(data, function(d) { return d.UTCTimestamp; }))
 		.range([padding, w - padding])
-		.nice();
+		//.nice();
 
 	// create x axis labels
 	xAxisTicks = w / 100;
@@ -246,11 +266,31 @@ function focusChart(data, svg, focus) {
 		.extent([[padding, 0.5], [w - padding, focusHeight + 0.5]])
 		.on("brush", brushed)
 		.on("end", brushended);
+		
+
 
 	const defaultSelection = [xScale.range()[0], xScale.range()[1]];
+	if (ratio === null) 
+	{
+		ratio = defaultSelection[1] / d3.select("#focus svg").attr("viewBox").split(',')[2];
+	}
+	console.log(ratio);
+
+	// if (persistentBrushSelection == null) 
+	// {
+	// 	console.log("initaaa")
+	// 	persistentBrushSelection = defaultSelection;
+	// }
+	// else
+	// {
+	// 	console.log("not init")
+	// 	console.log (persistentBrushSelection)
+	// }
 
 	focus.append("g")
+		.attr("transform", "translate(0, " + (focusHeight + 1) + ")")
 		.call(xAxis, xScale, focusHeight);
+		// .call(xAxis);
 
 	focus.selectAll(".line")
 		.data(sumstat)
@@ -267,38 +307,48 @@ function focusChart(data, svg, focus) {
 				(d.values)
 		});
 
-	const gb = focus.append("g")
-		.attr("id", "focusSlider") // remove when performance fixed
-		.call(brush)
-		.call(brush.move, defaultSelection);
 
-	// add when performance fixed
+	const gb = focus.append("g")
+		.attr("id", "focusSlider") // remove when performance fixed (????????????)
+		.call(brush)
+		.call(brush.move, defaultSelection); // this line resets the focus area on resize,, need to fix...
+
+	// add when performance fixed (????????????)
 	// gb.selectAll(".selection")
 	// 	.attr("id", "focusSlider");
 
-	var observer = new MutationObserver(function(mutations) {
-		mutations.forEach(function(mutation) {
-			if (mutation.type == "attributes") {
-				[minX, maxX] = focus.property("value")
-				minY = d3.min(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
-				maxY = d3.max(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
-				// desperately needs to be rewritten to just change the domain, nothing else, but it works for now...
-				lineChart( data, svg )
-			}
-		});
-	});
-	observer.observe(document.getElementById("focusSlider"), {
-		attributes: true //configure it to listen to attribute changes
-	});
+	// huh, this was actually unnecessary
+	// persistentObserver = new MutationObserver(function(mutations) {
+	// 	mutations.forEach(function(mutation) {
+	// 		if (mutation.type == "attributes") {
+	// 			[minX, maxX] = focus.property("value")
+	// 			minY = d3.min(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
+	// 			maxY = d3.max(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
+	// 			// desperately needs to be rewritten to just change the domain, nothing else, but it works for now...
+	// 			lineChart( data, svg )
+	// 		}
+	// 	});
+	// });
+	// persistentObserver.observe(document.getElementById("focusSlider"), {
+	// 	attributes: true //configure it to listen to attribute changes
+	// });
 
 	function brushed() {
 		if (d3.event.selection) {
-			focus.property("value", d3.event.selection.map(xScale.invert, xScale));
+			//focus.property("value", d3.event.selection.map(xScale.invert, xScale));
 			focus.dispatch("input");
+
+			[minX, maxX] = d3.event.selection.map(xScale.invert, xScale)
+			minY = d3.min(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
+			maxY = d3.max(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
+			lineChart( data, svg )
 		}
 	}
 
 	function brushended() {
+		// move this to brushed function for live changes
+
+
 		if (!d3.event.selection) {
 			gb.call(brush.move, defaultSelection);
 		}

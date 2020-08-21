@@ -3,7 +3,7 @@ body
     background-color: white;
 }
 
-#chart {
+/* #chart {
         position: fixed;
         left: 0px;
         right: 0px;
@@ -16,4 +16,12 @@ body
         left: 0px;
         right: 0px;
         bottom: 0px;
+} */
+
+#chart {
+        height: 80vh
+}
+
+#focus {
+        height: 20vh
 }
