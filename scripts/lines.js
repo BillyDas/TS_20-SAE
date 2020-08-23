@@ -15,15 +15,15 @@ function init() {
 
 	// list of sensors available
 	var sensorIds = [
-		"0x2",
+		//"0x2",
 		"0x3",
 		"0x4",
 		"0x7",
 		"0x8",
 		"0x9",
 		"0x10",
-		"0x11",
-		"0x12",
+		//"0x11",
+		//"0x12",
 		"0xe",
 		"0xf"
 	];
@@ -301,11 +301,10 @@ function focusChart(data, svg, focus) {
 
 
 	const defaultSelection = [xScale.range()[0], xScale.range()[1]];
-	if (ratio === null) 
-	{
-		ratio = defaultSelection[1] / d3.select("#focus svg").attr("viewBox").split(',')[2];
-	}
-	console.log(ratio);
+	// if (ratio === null) 
+	// {
+	// 	ratio = defaultSelection[1] / d3.select("#focus svg").attr("viewBox").split(',')[2];
+	// }
 
 	// if (persistentBrushSelection == null) 
 	// {
@@ -344,6 +343,13 @@ function focusChart(data, svg, focus) {
 		.call(brush)
 		.call(brush.move, defaultSelection); // this line resets the focus area on resize,, need to fix...
 
+	// if (persistentSelection === null) {
+	// 	gb.call(brush.move, defaultSelection)
+	// } else {
+	// 	gb.call(brush.move, [persistentSelection[0] * ( xScale.range()[0] / ratio[0]), persistentSelection[1] * (xScale.range()[1] / ratio[1])] )
+	// }
+
+
 	// add when performance fixed (????????????)
 	// gb.selectAll(".selection")
 	// 	.attr("id", "focusSlider");
@@ -372,6 +378,10 @@ function focusChart(data, svg, focus) {
 			[minX, maxX] = d3.event.selection.map(xScale.invert, xScale)
 			minY = d3.min(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
 			maxY = d3.max(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
+
+			// ratio = xScale.range();
+			// persistentSelection = d3.event.selection;
+
 			lineChart( data, svg )
 		}
 	}
