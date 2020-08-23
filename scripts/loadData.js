@@ -34,4 +34,4 @@ function loadData() {
 }
 
 // starts to load data before window loads
-loadData();
+// loadData();
