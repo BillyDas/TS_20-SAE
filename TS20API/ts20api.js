@@ -107,8 +107,6 @@ app.post('/sync', function (req, res) {
   var locHash = crypto.createHash('md5').update(rawdata).digest("hex");
   rawdata = rawdata.replace(/'/g,'"');
   var dataArr = JSON.parse(rawdata);
-  console.log(hash);
-  console.log(locHash);
   //Check Parameters are valid
   if (hash == locHash) {
     try {
