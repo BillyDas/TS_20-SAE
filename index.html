@@ -13,18 +13,12 @@
 
 	<link rel="stylesheet" type="text/css" href="styles/style.css">
 	<script src="https://d3js.org/d3.v5.min.js"></script>
-	
+	<script src="scripts/loadData.js"></script>
 </head>
 
 <body>
 	<div id="chart"></div>
 	<div id="focus"></div>
-	<script>
-		const url = "http://ts20.billydasdev.com:3000/desc?canId=[\"0x611-0\", \"0x611-1\"]";
-		fetch(url)
-			.then(response => response.json())
-			.then(data => console.log(data));
-	</script>
 	<script src="scripts/lines.js"></script>
 </body>
 
