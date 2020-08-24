@@ -1,0 +1,16 @@
+INSERT INTO SensorUnit (UnitName, UnitMetric) VALUES
+	("acceleration", "g"),
+	("degrees per second", "deg/s");
+
+INSERT INTO SensorType (Description, UnitId) VALUES
+	("G-Force (Acceleration) Sensor", "1"),
+	("Gyroscopic (Rotation) Sensor", "2");
+
+INSERT INTO Sensors (CanId, Name, SensorTypeId) VALUES
+	("0x610-0", "X axis G-Force (Acceleration) Sensor", "1"),
+	("0x610-1", "Y axis G-Force (Acceleration) Sensor", "1"),
+	("0x610-2", "Z axis G-Force (Acceleration) Sensor", "1"),
+	("0x611-0", "X axis Gyroscopic (Rotation) Sensor", "2"),
+	("0x611-1", "Y axis Gyroscopic (Rotation) Sensor", "2"),
+	("0x611-2", "Z axis Gyroscopic (Rotation) Sensor", "2");
+
