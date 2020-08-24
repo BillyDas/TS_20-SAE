@@ -208,7 +208,7 @@ function lineChart( data, svg ) {
 		.data(sensorNames)
 		.enter()
 		.append("circle")
-			.attr("cx", w - 100)
+			.attr("cx", w - 80)
 			.attr("cy", function(d,i){ return 100 + i*25})
 			.attr("r", 7)
 			.style("fill", function(d){ return color(d)})
@@ -218,7 +218,7 @@ function lineChart( data, svg ) {
 		.data(sensorNames)
 		.enter()
 		.append("text")
-			.attr("x", w - 90)
+			.attr("x", w - 70)
 			.attr("y", function(d,i){ return 100 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
 			.style("fill", function(d){ return color(d)})
 			.text(function(d){ return d})
@@ -258,7 +258,7 @@ function focusChart(data, svg, focus) {
 	area = (x, y) => d3.area()
 		.defined(d => !isNaN(d.value))
 		.x(d => x(d.date))
-		.y0(y(0)) // what the fuck? did i write this?
+		.y0(y(0))
 		.y1(d => y(d.value))
 
 	// set x axis to scale based on times
@@ -298,24 +298,7 @@ function focusChart(data, svg, focus) {
 		.on("brush", brushed)
 		.on("end", brushended);
 		
-
-
 	const defaultSelection = [xScale.range()[0], xScale.range()[1]];
-	// if (ratio === null) 
-	// {
-	// 	ratio = defaultSelection[1] / d3.select("#focus svg").attr("viewBox").split(',')[2];
-	// }
-
-	// if (persistentBrushSelection == null) 
-	// {
-	// 	console.log("initaaa")
-	// 	persistentBrushSelection = defaultSelection;
-	// }
-	// else
-	// {
-	// 	console.log("not init")
-	// 	console.log (persistentBrushSelection)
-	// }
 
 	focus.append("g")
 		.attr("transform", "translate(0, " + (focusHeight + 1) + ")")
@@ -337,18 +320,16 @@ function focusChart(data, svg, focus) {
 				(d.values)
 		});
 
-
 	const gb = focus.append("g")
-		.attr("id", "focusSlider") // remove when performance fixed (????????????)
+		//.attr("id", "focusSlider") // remove when performance fixed (????????????)
 		.call(brush)
-		.call(brush.move, defaultSelection); // this line resets the focus area on resize,, need to fix...
+		//.call(brush.move, defaultSelection); // this line resets the focus area on resize,, need to fix...
 
-	// if (persistentSelection === null) {
-	// 	gb.call(brush.move, defaultSelection)
-	// } else {
-	// 	gb.call(brush.move, [persistentSelection[0] * ( xScale.range()[0] / ratio[0]), persistentSelection[1] * (xScale.range()[1] / ratio[1])] )
-	// }
-
+	if (persistentSelection === null) {
+		gb.call(brush.move, defaultSelection)
+	} else {
+		gb.call(brush.move, [xScale(persistentSelection[0]), xScale(persistentSelection[1])])
+	}
 
 	// add when performance fixed (????????????)
 	// gb.selectAll(".selection")
@@ -379,19 +360,17 @@ function focusChart(data, svg, focus) {
 			minY = d3.min(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
 			maxY = d3.max(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
 
-			// ratio = xScale.range();
-			// persistentSelection = d3.event.selection;
-
 			lineChart( data, svg )
 		}
 	}
 
 	function brushended() {
-		// move this to brushed function for live changes
-
-
 		if (!d3.event.selection) {
 			gb.call(brush.move, defaultSelection);
+		}
+		else {
+			// can even move to brushed(), just probably better performance here?
+			persistentSelection = [xScale.invert(d3.event.selection[0]), xScale.invert(d3.event.selection[1])];
 		}
 	}
 }
