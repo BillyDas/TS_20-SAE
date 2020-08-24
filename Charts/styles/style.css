@@ -1,16 +1,3 @@
-<<<<<<< HEAD:Charts/styles/style.css
-body
-{
-    background-color: white;
-}
-
-#chart {
-        position: fixed;
-        left: 0px;
-        right: 0px;
-        top: 0px;
-        bottom: 0px;
-=======
 body
 {
     background-color: white;
@@ -37,5 +24,4 @@ body
 
 #focus {
         height: 20vh
->>>>>>> charts:styles/style.css
 }
