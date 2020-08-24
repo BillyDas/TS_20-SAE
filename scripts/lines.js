@@ -67,8 +67,8 @@ function init() {
 
 				// add listener to draw on resize
 				window.addEventListener("resize", function() {
-					lineChart( data, svg );
-					focusChart( data, svg, focus );
+					lineChart( lineData, svg );
+					focusChart( lineData, svg, focus );
 				});
 			})
 		.catch(error => {
