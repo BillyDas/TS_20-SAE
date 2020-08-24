@@ -64,6 +64,12 @@ function init() {
 				// draw line chart initially
 				lineChart( lineData, svg );
 				focusChart( lineData, svg, focus );
+
+				// add listener to draw on resize
+				window.addEventListener("resize", function() {
+					lineChart( data, svg );
+					focusChart( data, svg, focus );
+				});
 			})
 		.catch(error => {
 			// log the caught error if failure to load database
@@ -74,11 +80,7 @@ function init() {
 
 		
 
-		// add listener to draw on resize
-		window.addEventListener("resize", function() {
-			lineChart( data, svg );
-			focusChart( data, svg, focus );
-		});
+
 	})
 	.catch(error => {
 		// log the caught error if failure to load database
