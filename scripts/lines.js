@@ -1,6 +1,6 @@
+// sort these properly...
 var persistentSelection = null;
-var persistentViewBoxWidth = null;
-var ratio = null;
+var sensorNameCache = {};
 
 var chartDiv = document.getElementById("chart");
 var focusDiv = document.getElementById("focus");
@@ -46,16 +46,31 @@ function init() {
 	// load the dataset and then draw
 	fetch(url)
 		.then( response => response.json() )
-		.then( data => {
+		.then( lineData => {
 		// data conversion for time and data
-		data.forEach( function(d) {
+		lineData.forEach( function(d) {
 			d.UTCTimestamp = Date.parse(d.UTCTimestamp);
 			d.Data = parseFloat(d.Data);
 		} )
 
-		// draw line chart initially
-		lineChart( data, svg );
-		focusChart( data, svg, focus );
+		url = "http://ts20.billydasdev.com:3000/desc?canId=[" + sensorIds.toString() + "]"
+		fetch(url)
+			.then( response => response.json() )
+			.then( sensorDesc => {
+				sensorDesc.forEach( function(d) {
+					sensorNameCache[d.CanId] = d.Name
+				})
+
+				// draw line chart initially
+				lineChart( lineData, svg );
+				focusChart( lineData, svg, focus );
+			})
+		.catch(error => {
+			// log the caught error if failure to load database
+			console.log(error);
+		});
+
+
 
 		
 
@@ -69,6 +84,9 @@ function init() {
 		// log the caught error if failure to load database
 		console.log(error);
 	});
+
+
+	
 }
 
 function lineChart( data, svg ) {
@@ -95,7 +113,7 @@ function lineChart( data, svg ) {
 	{
 		xScale = d3.scaleTime()
 			.domain([minX, maxX])
-			.range([padding, w - padding])
+			.range([padding, (w - w * 0.1) - padding]) // temp fix for names not fitting
 			//.nice();
 	}
 	else
@@ -182,7 +200,7 @@ function lineChart( data, svg ) {
 		.append("rect")
 			.attr("x", 0 + padding)
 			.attr("y", 0)
-			.attr("width", chartDiv.clientWidth - (2 * padding))
+			.attr("width", (w - w * 0.1) - (2 * padding))
 			.attr("height", chartDiv.clientHeight)
 			.attr("fill", "#ccffff");
 
@@ -208,7 +226,7 @@ function lineChart( data, svg ) {
 		.data(sensorNames)
 		.enter()
 		.append("circle")
-			.attr("cx", w - 80)
+			.attr("cx", (w - w * 0.1) - 80)
 			.attr("cy", function(d,i){ return 100 + i*25})
 			.attr("r", 7)
 			.style("fill", function(d){ return color(d)})
@@ -218,10 +236,10 @@ function lineChart( data, svg ) {
 		.data(sensorNames)
 		.enter()
 		.append("text")
-			.attr("x", w - 70)
+			.attr("x", (w - w * 0.1) - 70)
 			.attr("y", function(d,i){ return 100 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
 			.style("fill", function(d){ return color(d)})
-			.text(function(d){ return d})
+			.text(function(d){ return sensorNameCache[d]})
 			.attr("text-anchor", "left")
 			.style("alignment-baseline", "middle")
 
