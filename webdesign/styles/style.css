@@ -1,0 +1,35 @@
+body
+{
+    background-color: white;
+}
+
+/* #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 100px;
+}
+
+#focus {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
+} */
+
+#chart {
+        height: 80vh;
+        max-height: 80vh;
+        
+}
+
+#focus {
+        height: 20vh;
+        max-height: 20vh;
+}
+
+#graph{
+        height: 80vh;
+        max-height: 80vh;
+}
