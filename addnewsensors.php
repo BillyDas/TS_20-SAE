@@ -8,8 +8,6 @@
    <title>Add New Sensor</title>
 </head>
 <body>
-
-
    <h1>Adding New Sensors To The Database</h1>
    <hr>
    <h4> If You dont know the format of each of these questions please reffer to the tables for guidelines</h4>
@@ -152,7 +150,32 @@
         <fieldset>
            <legend>Add New Sensors Form:</legend>
  					 <label name="sensorName">What Is The Sensors Name (Sensor Name in Sensors Table)?</label><input id="sensorName" name="sensorName"/><br />
- 					 <label name="sensorCanID">What Is The Sensors CANID (CanId in Sensors Table)?</label><input id="sensorCanID" name="sensorCanID" placeholder="0x612" /><br />
+ 					 <label name="sensorCanID">What Is The Sensors CANID (CanId in Sensors Table)?</label>
+           <select id="sensorCanID">
+             <option value="" selected>No CanID</option>
+             <?php
+             $query = "SELECT SensorData.CanId FROM SensorData WHERE SensorData.CanId NOT IN (SELECT Sensors.CanId FROM Sensors) GROUP BY SensorData.CanId";
+             $results = mysqli_query($conn, $query) or trigger_error("Query Failed! SQL: $query - Error: ".mysqli_error($conn), E_USER_ERROR);
+             if ($results != null)
+             {
+               $sensorIDs = array();
+               while ($row = mysqli_fetch_assoc($results))
+               {
+                  array_push($sensorIDs, $row['CanId']);
+               }
+               foreach ($sensorIDs as $value){
+                 $dataused = (string)$value;
+                  echo "<option value=\""
+                   . $dataused , "\">"
+                   . $dataused , "</option>";
+               }
+               echo "</select>";
+             }
+
+              ?>
+              <br />
+
+
            <label for="sensortypeID">What Is The Sensor Types ID (Sensor Type Id in SensorType Table) if the sensory type you have doesent exist please select the following checkbox)?</label>
            <select id="sensortypeID">
              <option value="" selected>No ID</option>
@@ -177,11 +200,13 @@
 
               ?>
               <br />
-              <label for="notypeid">No Sensor Type Id</label>
+
+
+              <label id="nosensortypeid" for="notypeid">No Sensor Type Id</label>
               <input type="checkbox" id="notypeid" name="notypeid" value="notypeid"></input><br>
 
               <label id="sensordescriptionlbl" name="sensordescription">What Is The Sensors Description (Description in SensorType Table)</label><textarea id="sensordescription" rows="2" cols="50"></textarea><br />
-              <label for="unitname">What is the sensors measurement UnitID (UnitID in SensorUnit Table) if the UnitID doesent exist please select the following checkbox</label>
+              <label id="sensorunitidlbl" for="sensorunitid">What is the sensors measurement UnitID (UnitID in SensorUnit Table) if the UnitID doesent exist please select the following checkbox</label>
               <select id="sensorunitid">
                 <option value="" selected>No ID</option>
                 <?php
@@ -203,8 +228,9 @@
                   echo "</select>";
                 }
                  ?>
+
                  <br />
-              <label for="nomeasurementlbl">No Sensor Unit ID</label>
+              <label id="nomeasurementlbl" for="nomeasurement">No Sensor Unit ID</label>
               <input type="checkbox" id="nomeasurement" name="nomeasurement" value="nomeasurement"></input><br>
 
               <label id="unitnamelbl" for="unitname">What Is The Unit Name (e.g Celcius, Kilometers, Heat/Time)</label><input id="unitname" name="unitname"/><br />
@@ -215,29 +241,69 @@
       </form>
 
       <script>
-      var cb = document.getElementById('notypeid');
-      var cb2 = document.getElementById('nomeasurement');
+      //does stuff.
+      var noSensorTypeId = document.getElementById('notypeid');
+      var chekboxNoSensorUnitId = document.getElementById('nomeasurement');
 
-      var tb = document.getElementById('sensordescription');
-      var lb = document.getElementById('sensordescriptionlbl');
+      var tableSensorDescription = document.getElementById('sensordescription');
+      var labelSensorDescription = document.getElementById('sensordescriptionlbl');
 
       var tbmeasure = document.getElementById('unitname');
       var lbmeasure = document.getElementById('unitmetric');
       var unitnamelbl = document.getElementById('unitnamelbl');
       var unitmetriclbl = document.getElementById('unitmetriclbl');
 
-      cb.onchange = function() { // listen for event change
-       if(!cb.checked) { // check state
-         tb.style.visibility = 'hidden';
-         lb.style.visibility = 'hidden';
+      var Suid  = document.getElementById('sensorunitid');
+      var Suidlbl  = document.getElementById('sensorunitidlbl');
+      var nsui = document.getElementById('nomeasurementlbl');
+      var stid = document.getElementById('sensortypeID');
+      var lblNoSensorTypeId = document.getElementById('nosensortypeid');
+
+
+      noSensorTypeId.onchange = function() { // listen for event change
+       if(!noSensorTypeId.checked) { // check state
+         tableSensorDescription.style.visibility = 'hidden';
+         labelSensorDescription.style.visibility = 'hidden';
        } else {
-         tb.style.visibility = 'visible';
-         lb.style.visibility = 'visible';
+         tableSensorDescription.style.visibility = 'visible';
+         labelSensorDescription.style.visibility = 'visible';
        }
      }
 
-     cb2.onchange = function() { // listen for event change
-      if(!cb2.checked) { // check state
+     stid.onchange = function() { // listen for event change
+      if(stid.value !== "") { // check state
+        Suid.style.visibility = 'hidden';
+        nsui.style.visibility = 'hidden';
+        chekboxNoSensorUnitId.style.visibility = 'hidden';
+        Suidlbl.style.visibility = 'hidden';
+        noSensorTypeId.style.visibility = 'hidden';
+        chekboxNoSensorUnitId.style.visibility = 'hidden';
+        lblNoSensorTypeId.style.visibility = 'hidden';
+        tableSensorDescription.style.visibility = 'hidden';
+        labelSensorDescription.style.visibility = 'hidden';
+        tbmeasure.style.visibility = 'hidden';
+        lbmeasure.style.visibility = 'hidden';
+        unitnamelbl.style.visibility = 'hidden';
+        unitmetriclbl.style.visibility = 'hidden';
+      } else {
+        Suid.style.visibility = 'visible';
+        nsui.style.visibility = 'visible';
+        chekboxNoSensorUnitId.style.visibility = 'visible';
+        Suidlbl.style.visibility = 'visible';
+        noSensorTypeId.style.visibility = 'visible';
+        chekboxNoSensorUnitId.style.visibility = 'visible';
+        lblNoSensorTypeId.style.visibility = 'visible';
+        // tableSensorDescription.style.visibility = 'visible';
+        // labelSensorDescription.style.visibility = 'visible';
+        // tbmeasure.style.visibility = 'visible';
+        // lbmeasure.style.visibility = 'visible';
+        // unitnamelbl.style.visibility = 'visible';
+        // unitmetriclbl.style.visibility = 'visible';
+      }
+    }
+
+     chekboxNoSensorUnitId.onchange = function() { // listen for event change
+      if(!chekboxNoSensorUnitId.checked) { // check state
         tbmeasure.style.visibility = 'hidden';
         lbmeasure.style.visibility = 'hidden';
         unitnamelbl.style.visibility = 'hidden';
@@ -252,15 +318,15 @@
 
 
      window.onload = function(){
-       if(!cb.checked) { // check state
-         tb.style.visibility = 'hidden';
-         lb.style.visibility = 'hidden';
+       if(!noSensorTypeId.checked) { // check state
+         tableSensorDescription.style.visibility = 'hidden';
+         labelSensorDescription.style.visibility = 'hidden';
        }else {
-         tb.style.visibility = 'visible';
-         lb.style.visibility = 'visible';
+         tableSensorDescription.style.visibility = 'visible';
+         labelSensorDescription.style.visibility = 'visible';
        }
 
-       if(!cb2.checked) { // check state
+       if(!chekboxNoSensorUnitId.checked) { // check state
          tbmeasure.style.visibility = 'hidden';
          lbmeasure.style.visibility = 'hidden';
          unitnamelbl.style.visibility = 'hidden';
