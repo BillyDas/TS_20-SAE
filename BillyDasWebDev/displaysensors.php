@@ -45,7 +45,7 @@
              echo "<td>",$row['CanId'],"</td>\n";
              echo "<td>",$row['Name'],"</td>\n";
              echo "<td>",$row['SensorTypeId'],"</td>\n";
-             echo "</tr>\n ";s
+             echo "</tr>\n ";
           }
         }
       }
