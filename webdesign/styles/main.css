@@ -91,6 +91,17 @@ fieldset {
             background-color: rgb(56, 56, 56);
             position: relative;
                 bottom: 35px;
-                left: 60px;
+                left: 45px;
+    }
+    #navbar a:hover #inlinespan:before {
+        content: "";
+        position: absolute;
+        right: 100%;
+        top: 17px;
+        width: 0;
+        height: 0;
+        border-top: 5px solid transparent;
+        border-right: 5px solid rgb(56, 56, 56);
+        border-bottom: 5px solid transparent;
     }
 }
