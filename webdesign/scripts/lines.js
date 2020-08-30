@@ -9,19 +9,29 @@ var firstUpdate = true;
 
 var minX, maxX, minY, maxY = null
 
-function init() {
+function initLines() {
 	// create svg
 	var svg = d3.select(chartDiv).append("svg");
 	var focus = d3.select(focusDiv).append("svg");
 
 	//setup event listener for sensor selection change
 	$('#yAxisSelectPicker').change(function () {
-		updateGraph();
+		controlUpdate();
 	});
 
 	//update the graph initally when loaded
 	updateGraph();
 
+}
+
+function controlUpdate(){
+	if($('#yAxisSelectPicker').val() != ""){
+		updateGraph();
+	}
+	else{
+		$('#chart svg').empty();
+        $('#focus svg').empty();
+	}
 }
 
 function updateGraph() {
@@ -392,4 +402,6 @@ function focusChart(data, svg, focus) {
 }
 
 // run init on window load
-window.onload = init;
+$(document).ready(function(){
+    initLines();
+});
