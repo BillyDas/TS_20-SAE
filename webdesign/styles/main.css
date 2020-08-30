@@ -72,3 +72,25 @@ fieldset {
 #button {
     margin-top: 8px;
 }
+
+@media only screen and (max-width: 1024px) {
+    #navbar {
+        width: 58px;
+    }
+    #main {
+        margin-left: 78px;
+    }
+    #inlinespan {
+        display: none;
+    }
+    #navbar a:hover #inlinespan {
+            display: inline-block;
+            padding: 0.3em;
+            border: 1px solid black;
+            border-radius: 3px;
+            background-color: rgb(56, 56, 56);
+            position: relative;
+                bottom: 35px;
+                left: 60px;
+    }
+}
