@@ -5,6 +5,7 @@ var sensorNameCache = {};
 var chartDiv = document.getElementById("chart");
 var focusDiv = document.getElementById("focus");
 var padding = 100;
+var firstUpdate = true;
 
 var minX, maxX, minY, maxY = null
 
@@ -13,85 +14,83 @@ function init() {
 	var svg = d3.select(chartDiv).append("svg");
 	var focus = d3.select(focusDiv).append("svg");
 
+	//setup event listener for sensor selection change
+	$('#yAxisSelectPicker').change(function () {
+		updateGraph();
+	});
+
+	//update the graph initally when loaded
+	updateGraph();
+
+}
+
+function updateGraph() {
+	//select svg area
+	var svg = d3.select(chartDiv).select("svg");
+	var focus = d3.select(focusDiv).select("svg");
+
 	// list of sensors available
-	var sensorIds = [
-		"0x2",
-		"0x3",
-		"0x4",
-		"0x7",
-		"0x8",
-		"0x9",
-		"0x10",
-		"0x11",
-		"0x12",
-		"0xe",
-		"0xf"
-	];
+	var sensorIds = $('#yAxisSelectPicker').val();
 
 	// format strings for use in GET request
-	for (var i = 0; i < sensorIds.length; i ++)
-	{
+	for (var i = 0; i < sensorIds.length; i++) {
 		sensorIds[i] = '"' + sensorIds[i] + '"';
 	}
 
 	var startTime = "2020-08-23T16:51:05.970327Z";
 	var endTime = "2020-08-23T16:55:28.525013Z";
 
-	var url = "http://ts20.billydasdev.com:3000/data?canId=[" 
-	+ sensorIds.toString() 
-	+ "]&startTime='" + startTime 
-	+ "'&endTime='" + endTime + "'"
-	+ "&max=200000";
+	var url = "http://ts20.billydasdev.com:3000/data?canId=["
+		+ sensorIds.toString()
+		+ "]&startTime='" + startTime
+		+ "'&endTime='" + endTime + "'"
+		+ "&max=200000";
 
 	// load the dataset and then draw
 	fetch(url)
-		.then( response => response.json() )
-		.then( lineData => {
-		// data conversion for time and data
-		lineData.forEach( function(d) {
-			d.UTCTimestamp = Date.parse(d.UTCTimestamp);
-			d.Data = parseFloat(d.Data);
-		} )
-
-		url = "http://ts20.billydasdev.com:3000/desc?canId=[" + sensorIds.toString() + "]"
-		fetch(url)
-			.then( response => response.json() )
-			.then( sensorDesc => {
-				sensorDesc.forEach( function(d) {
-					sensorNameCache[d.CanId] = d.Name
-				})
-
-				// draw line chart initially
-				lineChart( lineData, svg );
-				focusChart( lineData, svg, focus );
-
-				// add listener to draw on resize
-				window.addEventListener("resize", function() {
-					lineChart( lineData, svg );
-					focusChart( lineData, svg, focus );
-				});
+		.then(response => response.json())
+		.then(lineData => {
+			// data conversion for time and data
+			lineData.forEach(function (d) {
+				d.UTCTimestamp = Date.parse(d.UTCTimestamp);
+				d.Data = parseFloat(d.Data);
 			})
+
+			url = "http://ts20.billydasdev.com:3000/desc?canId=[" + sensorIds.toString() + "]"
+			fetch(url)
+				.then(response => response.json())
+				.then(sensorDesc => {
+					sensorDesc.forEach(function (d) {
+						sensorNameCache[d.CanId] = d.Name
+					})
+
+					// draw line chart
+					lineChart(lineData, svg);
+					focusChart(lineData, svg, focus);
+
+					if (firstUpdate) {
+						// add listener to draw on resize
+						window.addEventListener("resize", function () {
+							lineChart(lineData, svg);
+							focusChart(lineData, svg, focus);
+						});
+						firstUpdate = false;
+					}
+
+				})
+				.catch(error => {
+					// log the caught error if failure to load database
+					console.log(error);
+				});
+
+		})
 		.catch(error => {
 			// log the caught error if failure to load database
 			console.log(error);
 		});
-
-
-
-		
-
-
-	})
-	.catch(error => {
-		// log the caught error if failure to load database
-		console.log(error);
-	});
-
-
-	
 }
 
-function lineChart( data, svg ) {
+function lineChart(data, svg) {
 
 	// clear canvas
 	d3.selectAll("#chart svg > *").remove();
@@ -107,39 +106,37 @@ function lineChart( data, svg ) {
 
 	// group data based on CanId
 	var sumstat = d3.nest()
-		.key(function(d) { return d.CanId; })
+		.key(function (d) { return d.CanId; })
 		.entries(data);
 
 	var xScale = null;
-	if (minX != null && maxX != null)
-	{
+	if (minX != null && maxX != null) {
 		xScale = d3.scaleTime()
 			.domain([minX, maxX])
 			.range([padding, (w - w * 0.1) - padding]) // temp fix for names not fitting
-			//.nice();
+		//.nice();
 	}
-	else
-	{
+	else {
 		// set x axis to scale based on times
 		xScale = d3.scaleTime()
-			.domain(d3.extent(data, function(d) { return d.UTCTimestamp; }))
+			.domain(d3.extent(data, function (d) { return d.UTCTimestamp; }))
 			.range([padding, w - padding])
-			//.nice();
+		//.nice();
 	}
 
-    // create x axis labels
-    xAxisTicks = w / 100;
+	// create x axis labels
+	xAxisTicks = w / 100;
 	var xAxis = d3.axisBottom()
 		.ticks(w / 100)
 		.scale(xScale);
 
 	// add x axis to the svg
-    svg.append("g")
+	svg.append("g")
 		.attr("transform", "translate(0, " + (h - padding) + ")")
 		.call(xAxis);
 
 	// text label for the x axis
-	svg.append("text")             
+	svg.append("text")
 		.attr("transform", "translate(" + (w / 2) + ", " + (h - padding + 40) + ")")
 		.style("text-anchor", "middle")
 		.style("font-size", "1.5em")
@@ -147,8 +144,7 @@ function lineChart( data, svg ) {
 
 
 	var yScale = null;
-	if (minY != null && maxY != null)
-	{
+	if (minY != null && maxY != null) {
 		// set y axis to scale based on data
 		var yScale = d3.scaleLinear()
 			.domain([minY, maxY])
@@ -158,19 +154,19 @@ function lineChart( data, svg ) {
 	else {
 		// set y axis to scale based on data
 		var yScale = d3.scaleLinear()
-			.domain([d3.min(data, function(d) {
+			.domain([d3.min(data, function (d) {
 				return d.Data;
 			}),
-				d3.max(data, function(d) {
-					return d.Data;
-				})])
+			d3.max(data, function (d) {
+				return d.Data;
+			})])
 			.range([h - padding, padding])
 			.nice();
 	}
 
-    // create y axis labels
-    yAxisTicks = h / 100;
-    var yAxis = d3.axisLeft()
+	// create y axis labels
+	yAxisTicks = h / 100;
+	var yAxis = d3.axisLeft()
 		.ticks(yAxisTicks)
 		.scale(yScale);
 
@@ -183,14 +179,14 @@ function lineChart( data, svg ) {
 	svg.append("text")
 		.attr("transform", "rotate(-90)")
 		.attr("y", padding / 3)
-		.attr("x",0 - (h / 2))
+		.attr("x", 0 - (h / 2))
 		.attr("dy", "1em")
 		.style("text-anchor", "middle")
 		.style("font-size", "1.5em")
-		.text("Value"); 
+		.text("Value");
 
 	// create group names
-	var sensorNames = sumstat.map(function(d){ return d.key })
+	var sensorNames = sumstat.map(function (d) { return d.key })
 
 	// create scale to map sensors to individual colour
 	var color = d3.scaleOrdinal()
@@ -200,57 +196,57 @@ function lineChart( data, svg ) {
 	svg.append("clipPath")
 		.attr("id", "chartClip")
 		.append("rect")
-			.attr("x", 0 + padding)
-			.attr("y", 0)
-			.attr("width", (w - w * 0.1) - (2 * padding))
-			.attr("height", chartDiv.clientHeight)
-			.attr("fill", "#ccffff");
+		.attr("x", 0 + padding)
+		.attr("y", 0)
+		.attr("width", (w - w * 0.1) - (2 * padding))
+		.attr("height", chartDiv.clientHeight)
+		.attr("fill", "#ccffff");
 
 	// add sensors as lines to the svg
 	svg.selectAll(".line")
 		.data(sumstat)
 		.enter()
 		.append("path")
-			.attr("class", "line")
-	    	.attr("fill", "none")
-	    	.attr("stroke", function(d){ return color(d.key); })
-	        .attr("stroke-width", 1.5)
-	        .attr("d", function(d) {
-	        	return d3.line()
-		    		.x(function(d) { return xScale(d.UTCTimestamp); })
-		    		.y(function(d) { return yScale(d.Data); })
-		    		(d.values)
-			})
-			.attr("clip-path", "url(#chartClip)");
+		.attr("class", "line")
+		.attr("fill", "none")
+		.attr("stroke", function (d) { return color(d.key); })
+		.attr("stroke-width", 1.5)
+		.attr("d", function (d) {
+			return d3.line()
+				.x(function (d) { return xScale(d.UTCTimestamp); })
+				.y(function (d) { return yScale(d.Data); })
+				(d.values)
+		})
+		.attr("clip-path", "url(#chartClip)");
 
 	// add dots for the legend
 	svg.selectAll("legenddots")
 		.data(sensorNames)
 		.enter()
 		.append("circle")
-			.attr("cx", (w - w * 0.1) - 80)
-			.attr("cy", function(d,i){ return 100 + i*25})
-			.attr("r", 7)
-			.style("fill", function(d){ return color(d)})
-	
+		.attr("cx", (w - w * 0.1) - 80)
+		.attr("cy", function (d, i) { return 100 + i * 25 })
+		.attr("r", 7)
+		.style("fill", function (d) { return color(d) })
+
 	// add legend text for each sensor
 	svg.selectAll("legendnames")
 		.data(sensorNames)
 		.enter()
 		.append("text")
-			.attr("x", (w - w * 0.1) - 70)
-			.attr("y", function(d,i){ return 100 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
-			.style("fill", function(d){ return color(d)})
-			.text(function(d){ return sensorNameCache[d]})
-			.attr("text-anchor", "left")
-			.style("alignment-baseline", "middle")
+		.attr("x", (w - w * 0.1) - 70)
+		.attr("y", function (d, i) { return 100 + i * 25 }) // 100 is where the first dot appears. 25 is the distance between dots
+		.style("fill", function (d) { return color(d) })
+		.text(function (d) { return sensorNameCache[d] })
+		.attr("text-anchor", "left")
+		.style("alignment-baseline", "middle")
 
 	// add a title to the chart
-	svg.append("text")             
+	/*svg.append("text")
 		.attr("transform", "translate(" + w / 2 + ", " + (padding / 2) + ")")
 		.style("text-anchor", "middle")
 		.style("font-size", "1.5em")
-		.text("Sensor Data Information for SAE Formula Car");
+		.text("Sensor Data Information for SAE Formula Car");*/
 }
 
 function focusChart(data, svg, focus) {
@@ -260,13 +256,13 @@ function focusChart(data, svg, focus) {
 	var focusHeight = 100
 	var focusPadding = 20
 
-	var margin = {top: 20, right: 20, bottom: 30, left: 40}
+	var margin = { top: 20, right: 20, bottom: 30, left: 40 }
 
 	var w = chartDiv.clientWidth;
 
 	// group data based on CanId
 	var sumstat = d3.nest()
-		.key(function(d) { return d.CanId; })
+		.key(function (d) { return d.CanId; })
 		.entries(data);
 
 	// configure focus view size
@@ -283,9 +279,9 @@ function focusChart(data, svg, focus) {
 
 	// set x axis to scale based on times
 	var xScale = d3.scaleTime()
-		.domain(d3.extent(data, function(d) { return d.UTCTimestamp; }))
+		.domain(d3.extent(data, function (d) { return d.UTCTimestamp; }))
 		.range([padding, w - padding])
-		//.nice();
+	//.nice();
 
 	// create x axis labels
 	xAxisTicks = w / 100;
@@ -295,10 +291,10 @@ function focusChart(data, svg, focus) {
 
 	var focusYScale = d3.scaleLinear()
 		.domain([
-			d3.min(data, function(d) {
+			d3.min(data, function (d) {
 				return d.Data;
 			}),
-			d3.max(data, function(d) {
+			d3.max(data, function (d) {
 				return d.Data;
 			})
 		])
@@ -306,7 +302,7 @@ function focusChart(data, svg, focus) {
 		.nice();
 
 	// create group names
-	var sensorNames = sumstat.map(function(d){ return d.key })
+	var sensorNames = sumstat.map(function (d) { return d.key })
 
 	// create scale to map sensors to individual colour
 	var color = d3.scaleOrdinal()
@@ -317,13 +313,13 @@ function focusChart(data, svg, focus) {
 		.extent([[padding, 0.5], [w - padding, focusHeight + 0.5]])
 		.on("brush", brushed)
 		.on("end", brushended);
-		
+
 	const defaultSelection = [xScale.range()[0], xScale.range()[1]];
 
 	focus.append("g")
 		.attr("transform", "translate(0, " + (focusHeight + 1) + ")")
 		.call(xAxis, xScale, focusHeight);
-		// .call(xAxis);
+	// .call(xAxis);
 
 	focus.selectAll(".line")
 		.data(sumstat)
@@ -331,19 +327,19 @@ function focusChart(data, svg, focus) {
 		.append("path")
 		.attr("class", "line")
 		.attr("fill", "none")
-		.attr("stroke", function(d){ return color(d.key); })
+		.attr("stroke", function (d) { return color(d.key); })
 		.attr("stroke-width", 1.5)
-		.attr("d", function(d) {
+		.attr("d", function (d) {
 			return d3.line()
-				.x(function(d) { return xScale(d.UTCTimestamp); })
-				.y(function(d) { return focusYScale(d.Data); })
+				.x(function (d) { return xScale(d.UTCTimestamp); })
+				.y(function (d) { return focusYScale(d.Data); })
 				(d.values)
 		});
 
 	const gb = focus.append("g")
 		//.attr("id", "focusSlider") // remove when performance fixed (????????????)
 		.call(brush)
-		//.call(brush.move, defaultSelection); // this line resets the focus area on resize,, need to fix...
+	//.call(brush.move, defaultSelection); // this line resets the focus area on resize,, need to fix...
 
 	if (persistentSelection === null) {
 		gb.call(brush.move, defaultSelection)
@@ -380,7 +376,7 @@ function focusChart(data, svg, focus) {
 			minY = d3.min(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
 			maxY = d3.max(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
 
-			lineChart( data, svg )
+			lineChart(data, svg)
 		}
 	}
 

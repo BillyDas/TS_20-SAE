@@ -19,9 +19,17 @@ body
 } */
 
 #chart {
-        height: 80vh
+        height: 60vh;
+        max-height: 60vh;
+        
 }
 
 #focus {
-        height: 20vh
+        height: 10vh;
+        max-height: 10vh;
+}
+
+#graph{
+        height: 80vh;
+        max-height: 80vh;
 }
