@@ -23,8 +23,8 @@ body {
     text-decoration: none;
     color: rgb(217,217,217);
     border: 1px solid transparent;
-    height: 1.5em;
-    line-height: 1.5;
+    height: 2.5em;
+    line-height: 1em;
 }
 
 #navbar a:hover, #navbar #selected {
@@ -41,7 +41,7 @@ body {
 #inlinespan {
     display: inline-block;
     position: relative;
-        bottom: 0.3em;
+        bottom: 0;
 }
 
 #navbar img {
