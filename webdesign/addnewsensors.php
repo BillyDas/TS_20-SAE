@@ -6,8 +6,11 @@
    <meta name="keywords" content="PHP" />
    <meta name="author" content="Billy Dasopatis / 101156315" />
    <title>Add New Sensor</title>
+  <?php require "inc/head.html" ?>
 </head>
 <body>
+   <?php include "inc/navbarContents.php" ?>
+   <div id = "main">
    <h1>Adding New Sensors To The Database</h1>
    <hr>
    <h4> If You dont know the format of each of these questions please reffer to the tables for guidelines</h4>
@@ -340,5 +343,6 @@
 
      };
       </script>
+</div>
 </body>
 </html>

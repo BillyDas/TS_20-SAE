@@ -63,12 +63,6 @@ body {
     font-weight: lighter;
 }
 
-/*useless, delete when done*/
-#main img {
-    width: 80%;
-    height:40em;
-}
-
 fieldset {
     width: 30%;
     box-sizing: border-box;
