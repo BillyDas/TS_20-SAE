@@ -33,3 +33,11 @@ body
         height: 80vh;
         max-height: 80vh;
 }
+
+.alert{
+        float: right;
+        z-index: 20;
+        margin-top: 1vh;
+        max-width: 60vh;
+        max-height: 40vh;
+}

@@ -4,19 +4,14 @@
 <head>
     <title>SAE Data App</title>
     <?php require "inc/head.html" ?>
+    <script src="scripts/alert.js"></script>
     <?php require "func/fnSensorsList.php" ?>
 </head>
 
 <body>
     <?php include "inc/navbarContents.php" ?>
-    <div class="alert alert-warning" role="alert">
-        <h4 class="alert-heading">Select Sensors!</h4>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-        <p>Please select sensors for the x and y axis to graph.</p>
-    </div>
     <div id="main">
+        <div id="alert"></div>
         <h1>Custom Visualisation</h1>
         <div id="graph">
             <div id="chart"></div>
@@ -39,5 +34,4 @@
         </div>
     </div>
 </body>
-
 </html>
