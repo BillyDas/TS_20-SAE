@@ -20,7 +20,7 @@
             <label>X-Axis Sensors: </label>
             <select id="xAxisSelectPicker" class="selectpicker" multiple data-live-search="true">
                 <option value="" disabled>Choose x-axis sensors</option>
-                <option value="Time" disabled selected>Choose x-axis sensors</option>
+                <option value="Time" disabled selected>Time</option>
                 <!--<?php echoSensors() ?> -->
             </select>
             &nbsp;&nbsp;&nbsp;&nbsp;
