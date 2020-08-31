@@ -7,8 +7,10 @@ var focusDiv = document.getElementById("focus");
 var padding = 100;
 var firstUpdate = true;
 
-var defEndDateTime = moment();
+//var defEndDateTime = moment();
+var defEndDateTime = moment(1598201728525);
 var defStartDateTime = moment(defEndDateTime - (24 * 3600 * 1000));
+//startTime = "2020-08-23T16:51:05.970327Z"
 
 var minX, maxX, minY, maxY = null;
 
@@ -25,18 +27,26 @@ function initLines() {
 	$('#endDateTime').datetimepicker('date', defEndDateTime);
 	$('#startDateTime').datetimepicker('date', defStartDateTime);
 
+	$("#endDateTime").on("change.datetimepicker", ({ date, oldDate }) => {
+		controlUpdate();
+	})
+
+	$("#startDateTime").on("change.datetimepicker", ({ date, oldDate }) => {
+		controlUpdate();
+	})
+
 	//update the graph initally when loaded
 	updateGraph();
 
 }
 
-function controlUpdate(){
-	if($('#yAxisSelectPicker').val() != ""){
+function controlUpdate() {
+	if ($('#yAxisSelectPicker').val() != "") {
 		updateGraph();
 	}
-	else{
+	else {
 		$('#chart svg').empty();
-        $('#focus svg').empty();
+		$('#focus svg').empty();
 	}
 }
 
@@ -53,8 +63,8 @@ function updateGraph() {
 		sensorIds[i] = '"' + sensorIds[i] + '"';
 	}
 
-	var startTime = "2020-08-23T16:51:05.970327Z";
-	var endTime = "2020-08-23T16:55:28.525013Z";
+	var startTime = $('#startDateTime').datetimepicker('date').utc().valueOf();
+	var endTime = $('#endDateTime').datetimepicker('date').utc().valueOf();
 
 	var url = "http://ts20.billydasdev.com:3000/data?canId=["
 		+ sensorIds.toString()
@@ -408,6 +418,6 @@ function focusChart(data, svg, focus) {
 }
 
 // run init on window load
-$(document).ready(function(){
-    initLines();
+$(document).ready(function () {
+	initLines();
 });
