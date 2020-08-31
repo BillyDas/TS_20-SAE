@@ -8,9 +8,9 @@ var padding = 100;
 var firstUpdate = true;
 
 //var defEndDateTime = moment();
-var defEndDateTime = moment(1598201728525);
-var defStartDateTime = moment(defEndDateTime - (24 * 3600 * 1000));
-//startTime = "2020-08-23T16:51:05.970327Z"
+var defEndDateTime = moment("2020-08-23T16:55:05.970327")
+var defStartDateTime = moment("2020-08-23T16:50:05.970327");
+//var defStartDateTime = moment(defEndDateTime - (24 * 3600 * 1000));
 
 var minX, maxX, minY, maxY = null;
 
@@ -63,8 +63,8 @@ function updateGraph() {
 		sensorIds[i] = '"' + sensorIds[i] + '"';
 	}
 
-	var startTime = $('#startDateTime').datetimepicker('date').utc().valueOf();
-	var endTime = $('#endDateTime').datetimepicker('date').utc().valueOf();
+	var startTime = $('#startDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS');
+	var endTime = $('#endDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS');
 
 	var url = "http://ts20.billydasdev.com:3000/data?canId=["
 		+ sensorIds.toString()
