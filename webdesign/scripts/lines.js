@@ -7,7 +7,12 @@ var focusDiv = document.getElementById("focus");
 var padding = 100;
 var firstUpdate = true;
 
-var minX, maxX, minY, maxY = null
+//var defEndDateTime = moment();
+var defEndDateTime = moment("2020-08-23T16:55:05.970327")
+var defStartDateTime = moment("2020-08-23T16:50:05.970327");
+//var defStartDateTime = moment(defEndDateTime - (24 * 3600 * 1000));
+
+var minX, maxX, minY, maxY = null;
 
 function initLines() {
 	// create svg
@@ -19,18 +24,36 @@ function initLines() {
 		controlUpdate();
 	});
 
+	$('#endDateTime').datetimepicker('date', defEndDateTime);
+	$('#startDateTime').datetimepicker('date', defStartDateTime);
+
+	$("#endDateTime").on("change.datetimepicker", ({ date, oldDate }) => {
+		$('#chart svg').empty();
+		$('#focus svg').empty();
+		controlUpdate();
+	})
+
+	$("#startDateTime").on("change.datetimepicker", ({ date, oldDate }) => {
+		$('#chart svg').empty();
+		$('#focus svg').empty();
+		controlUpdate();
+	})
+
 	//update the graph initally when loaded
 	updateGraph();
 
 }
 
-function controlUpdate(){
-	if($('#yAxisSelectPicker').val() != ""){
+function controlUpdate() {
+	if ($('#yAxisSelectPicker').val() != "" && 
+			$('#startDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "" &&
+			$('#endDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "")  {
 		updateGraph();
+		console.log(this.id);
 	}
-	else{
+	else {
 		$('#chart svg').empty();
-        $('#focus svg').empty();
+		$('#focus svg').empty();
 	}
 }
 
@@ -47,8 +70,8 @@ function updateGraph() {
 		sensorIds[i] = '"' + sensorIds[i] + '"';
 	}
 
-	var startTime = "2020-08-23T16:51:05.970327Z";
-	var endTime = "2020-08-23T16:55:28.525013Z";
+	var startTime = $('#startDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS');
+	var endTime = $('#endDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS');
 
 	var url = "http://ts20.billydasdev.com:3000/data?canId=["
 		+ sensorIds.toString()
@@ -402,6 +425,6 @@ function focusChart(data, svg, focus) {
 }
 
 // run init on window load
-$(document).ready(function(){
-    initLines();
+$(document).ready(function () {
+	initLines();
 });

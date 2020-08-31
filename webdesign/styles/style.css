@@ -41,3 +41,22 @@ body
         max-width: 60vh;
         max-height: 40vh;
 }
+
+#settings table{
+        width: 100%;
+        table-layout: fixed;
+}
+
+#settings td{
+        text-align: center;
+}
+
+#settings>tr:nth-child(2)>td:nth-child(odd){
+        text-align: right;
+        max-width: 15vh;
+}
+
+#settings .date{
+        max-width: 30vh;
+}
+
