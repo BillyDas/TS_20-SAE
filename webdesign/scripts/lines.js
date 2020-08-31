@@ -28,10 +28,14 @@ function initLines() {
 	$('#startDateTime').datetimepicker('date', defStartDateTime);
 
 	$("#endDateTime").on("change.datetimepicker", ({ date, oldDate }) => {
+		$('#chart svg').empty();
+		$('#focus svg').empty();
 		controlUpdate();
 	})
 
 	$("#startDateTime").on("change.datetimepicker", ({ date, oldDate }) => {
+		$('#chart svg').empty();
+		$('#focus svg').empty();
 		controlUpdate();
 	})
 
@@ -41,8 +45,11 @@ function initLines() {
 }
 
 function controlUpdate() {
-	if ($('#yAxisSelectPicker').val() != "") {
+	if ($('#yAxisSelectPicker').val() != "" && 
+			$('#startDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "" &&
+			$('#endDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "")  {
 		updateGraph();
+		console.log(this.id);
 	}
 	else {
 		$('#chart svg').empty();
