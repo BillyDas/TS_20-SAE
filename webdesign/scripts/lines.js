@@ -7,7 +7,10 @@ var focusDiv = document.getElementById("focus");
 var padding = 100;
 var firstUpdate = true;
 
-var minX, maxX, minY, maxY = null
+var defEndDateTime = moment();
+var defStartDateTime = moment(defEndDateTime - (24 * 3600 * 1000));
+
+var minX, maxX, minY, maxY = null;
 
 function initLines() {
 	// create svg
@@ -18,6 +21,9 @@ function initLines() {
 	$('#yAxisSelectPicker').change(function () {
 		controlUpdate();
 	});
+
+	$('#endDateTime').datetimepicker('date', defEndDateTime);
+	$('#startDateTime').datetimepicker('date', defStartDateTime);
 
 	//update the graph initally when loaded
 	updateGraph();
