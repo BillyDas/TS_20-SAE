@@ -23,21 +23,11 @@ function initLines() {
 	$('#startDateTime').datetimepicker('date', defStartDateTime);
 
 	//setup event listener for sensor selection change
-	$('#yAxisSelectPicker').change(function () {
+	$('#btnSaveSettings').click(function () { controlUpdate(); });
+
+	$('#settingsModal').on('hidden.bs.modal', function (e) {
 		controlUpdate();
 	});
-
-	$("#endDateTime").on("change.datetimepicker", ({ date, oldDate }) => {
-		$('#chart svg').empty();
-		$('#focus svg').empty();
-		controlUpdate();
-	})
-
-	$("#startDateTime").on("change.datetimepicker", ({ date, oldDate }) => {
-		$('#chart svg').empty();
-		$('#focus svg').empty();
-		controlUpdate();
-	})
 
 	//update the graph initally when loaded
 	updateGraph();
@@ -49,7 +39,6 @@ function controlUpdate() {
 		$('#startDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "" &&
 		$('#endDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "") {
 		updateGraph();
-		console.log(this.id);
 	}
 	else {
 		$('#chart svg').empty();
