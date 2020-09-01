@@ -61,11 +61,20 @@ body {
 }
 
 #navbar #logo {
-    height: 4em;
-    width: 7em;
-    margin: 0;
+    max-height: 4em;
+    max-width: 7em;
+    height: auto;
+    width: auto;
+    margin: 1em;
     margin-right: 0.5em;
     float: left;
+}
+
+#pic {
+    max-width: 50em;
+    max-height: 50em;
+    height: auto;
+    width: auto;
 }
 
 
