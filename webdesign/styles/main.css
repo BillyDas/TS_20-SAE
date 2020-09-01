@@ -135,6 +135,7 @@ fieldset {
     #navbar #logo {
         margin-top: 10px;
         margin-bottom: 0px;
+        margin-left: 0px;
         float: none;
         text-align: center;
         width: 100%;
