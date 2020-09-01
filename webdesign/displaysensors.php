@@ -11,7 +11,11 @@
    <h1>List of all sensors in the database.</h1>
    <hr>
    <?php
-      require_once('databasedetails.php');
+       require_once('func/dbconn.php');
+       $conn = new mysqli($servername, $username, $password, $dbname);
+       if ($conn->connect_error) {
+           die("Connection failed: " . $conn->connect_error);
+       }
 
 //-----------------------Function Definition-------------------------
       //this function is to print out the TOP half of the table

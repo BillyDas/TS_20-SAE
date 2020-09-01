@@ -16,6 +16,7 @@ body {
 }
 
 #navbar a {
+    clear: both;
     display: block;
     padding: 0.5em;
     font-size: 1em;
@@ -58,6 +59,24 @@ body {
     margin: 0;
     margin-right: 0.0em;
 }
+
+#navbar #logo {
+    max-height: 4em;
+    max-width: 7em;
+    height: auto;
+    width: auto;
+    margin: 1em;
+    margin-right: 0.5em;
+    float: left;
+}
+
+#pic {
+    max-width: 50em;
+    max-height: 50em;
+    height: auto;
+    width: auto;
+}
+
 
 #navbar p.category {
 	padding: 0 0 0 0.5em;
@@ -111,5 +130,23 @@ fieldset {
         border-top: 5px solid transparent;
         border-right: 5px solid rgb(56, 56, 56);
         border-bottom: 5px solid transparent;
+    }
+
+    #navbar #logo {
+        margin-top: 10px;
+        margin-bottom: 0px;
+        margin-left: 0px;
+        float: none;
+        text-align: center;
+        width: 100%;
+        height: auto;
+        max-height: 58px;
+        max-width: 58px;
+    }
+
+    #navbar p {
+        visibility: hidden;
+        max-width: 0em;
+        max-height: 0em;
     }
 }
