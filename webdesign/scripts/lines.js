@@ -19,13 +19,13 @@ function initLines() {
 	var svg = d3.select(chartDiv).append("svg");
 	var focus = d3.select(focusDiv).append("svg");
 
+	$('#endDateTime').datetimepicker('date', defEndDateTime);
+	$('#startDateTime').datetimepicker('date', defStartDateTime);
+
 	//setup event listener for sensor selection change
 	$('#yAxisSelectPicker').change(function () {
 		controlUpdate();
 	});
-
-	$('#endDateTime').datetimepicker('date', defEndDateTime);
-	$('#startDateTime').datetimepicker('date', defStartDateTime);
 
 	$("#endDateTime").on("change.datetimepicker", ({ date, oldDate }) => {
 		$('#chart svg').empty();
@@ -45,9 +45,9 @@ function initLines() {
 }
 
 function controlUpdate() {
-	if ($('#yAxisSelectPicker').val() != "" && 
-			$('#startDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "" &&
-			$('#endDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "")  {
+	if ($('#yAxisSelectPicker').val() != "" &&
+		$('#startDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "" &&
+		$('#endDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "") {
 		updateGraph();
 		console.log(this.id);
 	}
@@ -94,7 +94,7 @@ function updateGraph() {
 				.then(response => response.json())
 				.then(sensorDesc => {
 					sensorDesc.forEach(function (d) {
-						sensorNameCache[d.CanId] = d.Name
+						sensorNameCache[d.CanId] = d.Name + ' (' + d.UnitMetric + ')'
 					})
 
 					// draw line chart
@@ -173,7 +173,7 @@ function lineChart(data, svg) {
 		.attr("transform", "translate(" + (w / 2) + ", " + (h - padding + 40) + ")")
 		.style("text-anchor", "middle")
 		.style("font-size", "1.5em")
-		.text("Date");
+		.text("Time");
 
 
 	var yScale = null;

@@ -1,0 +1,89 @@
+<div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="settingsModalTitle"><i class="fa fa-cog"></i> Settings</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="settings" class="modal-body">
+                <table>
+                    <tr>
+                        <td>
+                            <label for="xAxisSelectPicker">X-Axis Sensors: </label>
+                        </td>
+                        <td>
+                            <select id="xAxisSelectPicker" class="selectpicker" multiple data-live-search="true" data-selected-text-format="count > 1" data-size="5">
+                                <option value="" disabled>Choose x-axis sensors</option>
+                                <option value="Time" disabled selected>Time</option> 
+                                <!--<?php echoSensors() ?> -->
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="yAxisSelectPicker">Y-Axis Sensors: </label>
+                        </td>
+                        <td>
+                            <select id="yAxisSelectPicker" class="selectpicker" multiple data-live-search="true" data-selected-text-format="count > 1" data-size="5">
+                                <option value="" disabled>Choose y-axis sensors</option>
+                                <?php echoSensors() ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="startDateTime">Start Time: </label>
+                        </td>
+                        <td>
+                            <div class="input-group date" id="startDateTime" data-target-input="nearest">
+                                <input type="text" class="form-control datetimepicker-input"
+                                    data-target="#startDateTime">
+                                <div class="input-group-append" data-target="#startDateTime"
+                                    data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="endDateTime">End Time: </label>
+                        </td>
+                        <td>
+                            <div class="input-group date" id="endDateTime" data-target-input="nearest">
+                                <input type="text" class="form-control datetimepicker-input" data-target="#endDateTime">
+                                <div class="input-group-append" data-target="#endDateTime" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function() {
+        $('#startDateTime').datetimepicker({
+            format: "DD/MM/YYYY hh:mmA"
+        });
+        $('#endDateTime').datetimepicker({
+            useCurrent: false,
+            format: "DD/MM/YYYY hh:mmA"
+        });
+        $("#startDateTime").on("change.datetimepicker", function(e) {
+            $('#endDateTime').datetimepicker('minDate', e.date);
+        });
+        $("#endDateTime").on("change.datetimepicker", function(e) {
+            $('#startDateTime').datetimepicker('maxDate', e.date);
+        });
+    });
+</script>

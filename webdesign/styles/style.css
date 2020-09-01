@@ -47,13 +47,8 @@ body
         table-layout: fixed;
 }
 
-#settings td{
-        text-align: center;
-}
-
-#settings>tr:nth-child(2)>td:nth-child(odd){
-        text-align: right;
-        max-width: 15vh;
+#settings>table>tr{
+        padding-bottom: 5vh;
 }
 
 #settings .date{
