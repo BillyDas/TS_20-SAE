@@ -1,4 +1,3 @@
-// sort these properly...
 var persistentSelection = null;
 var sensorNameCache = {};
 
@@ -7,43 +6,21 @@ var focusDiv = document.getElementById("focus");
 var padding = 100;
 var firstUpdate = true;
 
-//var defEndDateTime = moment();
-var defEndDateTime = moment("2020-08-23T16:55:05.970327")
-var defStartDateTime = moment("2020-08-23T16:50:05.970327");
-//var defStartDateTime = moment(defEndDateTime - (24 * 3600 * 1000));
+var startDateTime = moment("2020-08-23T16:50:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');;
+var endDateTime = moment("2020-08-23T16:55:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');;
 
 var minX, maxX, minY, maxY = null;
+
+var xAxisDataId = "";
+var yAxisDataId = "";
 
 function initLines() {
 	// create svg
 	var svg = d3.select(chartDiv).append("svg");
 	var focus = d3.select(focusDiv).append("svg");
 
-	$('#endDateTime').datetimepicker('date', defEndDateTime);
-	$('#startDateTime').datetimepicker('date', defStartDateTime);
-
-	//setup event listener for sensor selection change
-	$('#btnSaveSettings').click(function () { controlUpdate(); });
-
-	$('#settingsModal').on('hidden.bs.modal', function (e) {
-		controlUpdate();
-	});
-
 	//update the graph initally when loaded
 	updateGraph();
-
-}
-
-function controlUpdate() {
-	if ($('#yAxisSelectPicker').val() != "" &&
-		$('#startDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "" &&
-		$('#endDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "") {
-		updateGraph();
-	}
-	else {
-		$('#chart svg').empty();
-		$('#focus svg').empty();
-	}
 }
 
 function updateGraph() {
@@ -52,20 +29,17 @@ function updateGraph() {
 	var focus = d3.select(focusDiv).select("svg");
 
 	// list of sensors available
-	var sensorIds = $('#yAxisSelectPicker').val();
+	var yAxisIds = yAxisDataId;
 
 	// format strings for use in GET request
-	for (var i = 0; i < sensorIds.length; i++) {
-		sensorIds[i] = '"' + sensorIds[i] + '"';
+	for (var i = 0; i < yAxisIds.length; i++) {
+		yAxisIds[i] = '"' + yAxisIds[i] + '"';
 	}
 
-	var startTime = $('#startDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS');
-	var endTime = $('#endDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS');
-
 	var url = "http://ts20.billydasdev.com:3000/data?canId=["
-		+ sensorIds.toString()
-		+ "]&startTime='" + startTime
-		+ "'&endTime='" + endTime + "'"
+		+ yAxisIds.toString()
+		+ "]&startTime='" + startDateTime
+		+ "'&endTime='" + endDateTime + "'"
 		+ "&max=200000";
 
 	// load the dataset and then draw
@@ -78,7 +52,7 @@ function updateGraph() {
 				d.Data = parseFloat(d.Data);
 			})
 
-			url = "http://ts20.billydasdev.com:3000/desc?canId=[" + sensorIds.toString() + "]"
+			url = "http://ts20.billydasdev.com:3000/desc?canId=[" + yAxisIds.toString() + "]"
 			fetch(url)
 				.then(response => response.json())
 				.then(sensorDesc => {
