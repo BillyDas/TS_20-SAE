@@ -110,45 +110,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button id="btnSaveSettings" type="button" class="btn btn-primary">Update Graph</button>
+                <!--<button id="btnSaveSettings" type="button" class="btn btn-primary">Update Graph</button>-->
             </div>
         </div>
     </div>
 </div>
-<script type="text/javascript">
-    $(function () {
-        $('#startDateTime').datetimepicker({
-            format: "DD/MM/YYYY hh:mmA"
-        });
-        $('#endDateTime').datetimepicker({
-            useCurrent: false,
-            format: "DD/MM/YYYY hh:mmA"
-        });
-        $("#startDateTime").on("change.datetimepicker", function (e) {
-            $('#endDateTime').datetimepicker('minDate', e.date);
-        });
-        $("#endDateTime").on("change.datetimepicker", function (e) {
-            $('#startDateTime').datetimepicker('maxDate', e.date);
-        });
-
-        $('#settingsTimingLive').hide();
-
-        $('#dataTimingRange').parent().click(function () {
-            $('#dataTimingRange').parent().removeClass("btn btn-secondary");
-            $('#dataTimingLive').parent().removeClass("btn btn-primary active");
-            $('#dataTimingLive').parent().addClass("btn btn-secondary");
-            $('#dataTimingRange').parent().addClass("btn btn-primary active");
-            $('#settingsTimingRange').show();
-            $('#settingsTimingLive').hide();
-        });
-
-        $('#dataTimingLive').parent().click(function () {
-            $('#dataTimingLive').parent().removeClass("btn btn-secondary");
-            $('#dataTimingRange').parent().removeClass("btn btn-primary active");
-            $('#dataTimingRange').parent().addClass("btn btn-secondary");
-            $('#dataTimingLive').parent().addClass("btn btn-primary active");
-            $('#settingsTimingRange').hide();
-            $('#settingsTimingLive').show();
-        });
-    });
-</script>
+<script src="scripts/settingsModal.js"></script>

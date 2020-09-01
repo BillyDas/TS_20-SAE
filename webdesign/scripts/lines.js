@@ -1,4 +1,3 @@
-// sort these properly...
 var persistentSelection = null;
 var sensorNameCache = {};
 
@@ -7,11 +6,6 @@ var focusDiv = document.getElementById("focus");
 var padding = 100;
 var firstUpdate = true;
 
-//var defEndDateTime = moment();
-var defEndDateTime = moment("2020-08-23T16:55:05.970327")
-var defStartDateTime = moment("2020-08-23T16:50:05.970327");
-//var defStartDateTime = moment(defEndDateTime - (24 * 3600 * 1000));
-
 var minX, maxX, minY, maxY = null;
 
 function initLines() {
@@ -19,31 +13,8 @@ function initLines() {
 	var svg = d3.select(chartDiv).append("svg");
 	var focus = d3.select(focusDiv).append("svg");
 
-	$('#endDateTime').datetimepicker('date', defEndDateTime);
-	$('#startDateTime').datetimepicker('date', defStartDateTime);
-
-	//setup event listener for sensor selection change
-	$('#btnSaveSettings').click(function () { controlUpdate(); });
-
-	$('#settingsModal').on('hidden.bs.modal', function (e) {
-		controlUpdate();
-	});
-
 	//update the graph initally when loaded
 	updateGraph();
-
-}
-
-function controlUpdate() {
-	if ($('#yAxisSelectPicker').val() != "" &&
-		$('#startDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "" &&
-		$('#endDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "") {
-		updateGraph();
-	}
-	else {
-		$('#chart svg').empty();
-		$('#focus svg').empty();
-	}
 }
 
 function updateGraph() {
