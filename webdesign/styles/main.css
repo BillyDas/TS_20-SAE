@@ -51,6 +51,35 @@ body {
     margin-right: 0.5em;
 }
 
+<<<<<<< navbar
+=======
+#navbar i {
+    font-size: 1.5em;
+    height: 1.5em;
+    width: 1.5em;
+    margin: 0;
+    margin-right: 0.0em;
+}
+
+#navbar #logo {
+    max-height: 4em;
+    max-width: 7em;
+    height: auto;
+    width: auto;
+    margin: 1em;
+    margin-right: 0.5em;
+    float: left;
+}
+
+.pic {
+    max-width: 50em;
+    max-height: 50em;
+    height: auto;
+    width: auto;
+}
+
+
+>>>>>>> local
 #navbar p.category {
 	padding: 0 0 0 0.5em;
 }
