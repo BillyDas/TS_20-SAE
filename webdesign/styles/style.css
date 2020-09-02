@@ -41,3 +41,20 @@ body
         max-width: 60vh;
         max-height: 40vh;
 }
+
+#settings table{
+        width: 100%;
+        table-layout: fixed;
+}
+
+#settings>table>tr{
+        padding-bottom: 5vh;
+}
+
+#settings .date{
+        max-width: 30vh;
+}
+
+#igLive{
+        max-width: 30vh;
+}

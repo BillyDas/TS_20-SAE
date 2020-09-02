@@ -17,7 +17,11 @@
    <h4>Does your sensor spit out multiple types of data in an array? if so please fill out this form 1x for each of the senors arrays (check CanID / Sensor Name in the Sensors table to see the format)</h4>
 
    <?php
-      require_once('databasedetails.php');
+      require_once('func/dbconn.php');
+      $conn = new mysqli($servername, $username, $password, $dbname);
+      if ($conn->connect_error) {
+          die("Connection failed: " . $conn->connect_error);
+      }
       //this function is to print out the TOP half of the table
       function printdatapresensors(){
         echo "<table border=\"2\">\n";

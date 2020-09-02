@@ -1,0 +1,118 @@
+<div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="settingsModalTitle"><i class="fa fa-cog"></i> Settings</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="settings" class="modal-body">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <label for="xAxisSelectPicker">X-Axis Sensors: </label>
+                            </td>
+                            <td>
+                                <select id="xAxisSelectPicker" class="selectpicker" multiple data-live-search="true"
+                                    data-selected-text-format="count > 1" data-size="5">
+                                    <option value="" disabled>Choose x-axis sensors</option>
+                                    <option value="Time" disabled selected>Time</option>
+                                    <!--<?php echoSensors() ?> -->
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="yAxisSelectPicker">Y-Axis Sensors: </label>
+                            </td>
+                            <td>
+                                <select id="yAxisSelectPicker" class="selectpicker" multiple data-live-search="true"
+                                    data-selected-text-format="count > 1" data-size="5">
+                                    <option value="" disabled>Choose y-axis sensors</option>
+                                    <?php echoSensors() ?>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="dataTimingGroup">Time Range: </label>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                    <label class="btn btn-primary active">
+                                        <input type="radio" name="options" id="dataTimingRange" autocomplete="off"
+                                            checked>
+                                        Selected Range
+                                    </label>
+                                    <label class="btn btn-secondary">
+                                        <input type="radio" name="options" id="dataTimingLive" autocomplete="off"> Live
+                                        Data
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tbody id="settingsTimingRange">
+                        <tr>
+                            <td>
+                                <label for="startDateTime">Start Time: </label>
+                            </td>
+                            <td>
+                                <div class="input-group date" id="startDateTime" data-target-input="nearest">
+                                    <input type="text" class="form-control datetimepicker-input"
+                                        data-target="#startDateTime">
+                                    <div class="input-group-append" data-target="#startDateTime"
+                                        data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="endDateTime">End Time: </label>
+                            </td>
+                            <td>
+                                <div class="input-group date" id="endDateTime" data-target-input="nearest">
+                                    <input type="text" class="form-control datetimepicker-input"
+                                        data-target="#endDateTime">
+                                    <div class="input-group-append" data-target="#endDateTime"
+                                        data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tbody id="settingsTimingLive">
+                        <tr>
+                            <td>
+                                <label for="liveLoadFrom">Show Backlog Data: </label>
+                            </td>
+                            <td>
+                                <div id="igLive" class="input-group">
+                                    <input id="liveNum" type="text" class="form-control" pattern="[1-9][0-9]{0,2}">
+                                    <div class="input-group-append">
+                                        <select id="liveRange" class="custom-select">
+                                            <option value="60000">Minute/s</option>
+                                            <option value="3600000">Hour/s</option>
+                                            <option value="86400000">Day/s</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <!--<button id="btnSaveSettings" type="button" class="btn btn-primary">Update Graph</button>-->
+            </div>
+        </div>
+    </div>
+</div>
+<script src="scripts/settingsModal.js"></script>

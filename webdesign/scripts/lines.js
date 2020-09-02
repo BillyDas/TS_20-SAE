@@ -1,4 +1,3 @@
-// sort these properly...
 var persistentSelection = null;
 var sensorNameCache = {};
 
@@ -7,31 +6,21 @@ var focusDiv = document.getElementById("focus");
 var padding = 100;
 var firstUpdate = true;
 
-var minX, maxX, minY, maxY = null
+var startDateTime = moment("2020-08-23T16:50:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');;
+var endDateTime = moment("2020-08-23T16:55:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');;
+
+var minX, maxX, minY, maxY = null;
+
+var xAxisDataId = "";
+var yAxisDataId = "";
 
 function initLines() {
 	// create svg
 	var svg = d3.select(chartDiv).append("svg");
 	var focus = d3.select(focusDiv).append("svg");
 
-	//setup event listener for sensor selection change
-	$('#yAxisSelectPicker').change(function () {
-		controlUpdate();
-	});
-
 	//update the graph initally when loaded
 	updateGraph();
-
-}
-
-function controlUpdate(){
-	if($('#yAxisSelectPicker').val() != ""){
-		updateGraph();
-	}
-	else{
-		$('#chart svg').empty();
-        $('#focus svg').empty();
-	}
 }
 
 function updateGraph() {
@@ -40,20 +29,17 @@ function updateGraph() {
 	var focus = d3.select(focusDiv).select("svg");
 
 	// list of sensors available
-	var sensorIds = $('#yAxisSelectPicker').val();
+	var yAxisIds = yAxisDataId;
 
 	// format strings for use in GET request
-	for (var i = 0; i < sensorIds.length; i++) {
-		sensorIds[i] = '"' + sensorIds[i] + '"';
+	for (var i = 0; i < yAxisIds.length; i++) {
+		yAxisIds[i] = '"' + yAxisIds[i] + '"';
 	}
 
-	var startTime = "2020-08-23T16:51:05.970327Z";
-	var endTime = "2020-08-23T16:55:28.525013Z";
-
 	var url = "http://ts20.billydasdev.com:3000/data?canId=["
-		+ sensorIds.toString()
-		+ "]&startTime='" + startTime
-		+ "'&endTime='" + endTime + "'"
+		+ yAxisIds.toString()
+		+ "]&startTime='" + startDateTime
+		+ "'&endTime='" + endDateTime + "'"
 		+ "&max=200000";
 
 	// load the dataset and then draw
@@ -66,12 +52,12 @@ function updateGraph() {
 				d.Data = parseFloat(d.Data);
 			})
 
-			url = "http://ts20.billydasdev.com:3000/desc?canId=[" + sensorIds.toString() + "]"
+			url = "http://ts20.billydasdev.com:3000/desc?canId=[" + yAxisIds.toString() + "]"
 			fetch(url)
 				.then(response => response.json())
 				.then(sensorDesc => {
 					sensorDesc.forEach(function (d) {
-						sensorNameCache[d.CanId] = d.Name
+						sensorNameCache[d.CanId] = d.Name + ' (' + d.UnitMetric + ')'
 					})
 
 					// draw line chart
@@ -150,7 +136,7 @@ function lineChart(data, svg) {
 		.attr("transform", "translate(" + (w / 2) + ", " + (h - padding + 40) + ")")
 		.style("text-anchor", "middle")
 		.style("font-size", "1.5em")
-		.text("Date");
+		.text("Time");
 
 
 	var yScale = null;
@@ -402,6 +388,6 @@ function focusChart(data, svg, focus) {
 }
 
 // run init on window load
-$(document).ready(function(){
-    initLines();
+$(document).ready(function () {
+	initLines();
 });
