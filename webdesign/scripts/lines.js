@@ -14,6 +14,7 @@ var minX, maxX, minY, maxY = null;
 var xAxisDataId = "";
 var yAxisDataId = "";
 
+
 function initLines() {
 	// create svg
 	var svg = d3.select(chartDiv).append("svg");
@@ -252,7 +253,30 @@ function focusChart(data, svg, focus) {
 	var focusHeight = 100
 	var focusPadding = 20
 
-	var margin = { top: 20, right: 20, bottom: 30, left: 40 }
+	var arc = d3.arc()
+	.innerRadius(0)
+	.outerRadius((focusHeight - focusPadding * 2) / 2)
+	.startAngle(0)
+	.endAngle((d, i) => i ? Math.PI : -Math.PI)
+
+	var brushHandle = (g, selection) => g
+		.selectAll(".handle--custom")
+		.data([{type: "w"}, {type: "e"}])
+		.join(
+			enter => enter.append("path")
+				.attr("class", "handle--custom")
+				.attr("fill", "#666")
+				.attr("fill-opacity", 0.8)
+				.attr("stroke", "#000")
+				.attr("stroke-width", 1.5)
+				.attr("cursor", "ew-resize")
+				.attr("d", arc)
+		)
+		.attr("display", selection === null ? "none" : null)
+		.attr("transform", selection === null ? null : (d, i) => `translate(${selection[i]},${(focusHeight + focusPadding * 2) / 2})`)
+
+
+	//var margin = { top: 20, right: 20, bottom: 30, left: 40 }
 
 	var w = chartDiv.clientWidth;
 
@@ -337,6 +361,25 @@ function focusChart(data, svg, focus) {
 		.call(brush)
 	//.call(brush.move, defaultSelection); // this line resets the focus area on resize,, need to fix...
 
+
+	// var semi = d3.arc()
+	// 	.outerRadius(focusHeight / 2)
+	// 	.startAngle(0)
+	// 	.endAngle(function(d, i) { 
+	// 		console.log(d)
+	// 		console.log(i)
+	// 		return i ? -Math.PI : Math.PI;
+	// 	});
+
+	// gb.selectAll(".handle").append("path")
+	// 	.attr("transform", "translate(0," +  focusHeight / 2 + ")")
+	// 	.attr("d", semi);
+
+	// gb.selectAll(".handle").append("rect")
+	// 	.attr("width", "5")
+	// 	.attr("height", "20")
+	// 	.attr("fill", "#000000")
+
 	if (persistentSelection === null) {
 		gb.call(brush.move, defaultSelection)
 	} else {
@@ -373,6 +416,8 @@ function focusChart(data, svg, focus) {
 			maxY = d3.max(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
 
 			lineChart(data, svg)
+
+			d3.select(this).call(brushHandle, d3.event.selection);
 		}
 	}
 
@@ -385,6 +430,8 @@ function focusChart(data, svg, focus) {
 			persistentSelection = [xScale.invert(d3.event.selection[0]), xScale.invert(d3.event.selection[1])];
 		}
 	}
+
+
 }
 
 // run init on window load
