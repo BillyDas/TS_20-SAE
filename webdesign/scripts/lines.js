@@ -25,6 +25,15 @@ function initLines() {
 }
 
 function updateGraph() {
+	// TODO: these are subject to change, but are temporary and needed for loading img
+	if (yAxisDataId === "" || startDateTime === "" || endDateTime === "" ) // xAxis needs to be added when configured
+	{
+		return;
+	}
+
+	var loading = d3.select(loadingGraph);
+	loading.style("display", "block");
+
 	//select svg area
 	var svg = d3.select(chartDiv).select("svg");
 	var focus = d3.select(focusDiv).select("svg");
@@ -60,6 +69,9 @@ function updateGraph() {
 					sensorDesc.forEach(function (d) {
 						sensorNameCache[d.CanId] = d.Name + ' (' + d.UnitMetric + ')'
 					})
+
+					// hide loading graphic
+					loading.style("display", "none");
 
 					// draw line chart
 					lineChart(lineData, svg);
