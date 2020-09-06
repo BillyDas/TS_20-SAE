@@ -13,8 +13,8 @@
    <div id = "main">
    <h1>Adding New Sensors To The Database</h1>
    <hr>
-   <h4> If You dont know the format of each of these questions please reffer to the tables for guidelines</h4>
-   <h4>Does your sensor spit out multiple types of data in an array? if so please fill out this form 1x for each of the senors arrays (check CanID / Sensor Name in the Sensors table to see the format)</h4>
+   <h4> If You dont know the format of each of these questions please refer to the tables for guidelines</h4>
+   <h4>Does your sensor spit out multiple types of data in an array? If so, please fill out this form 1x for each of the senors arrays (Check CanID / Sensor Name in the Sensors table to see the format)</h4>
 
    <?php
       require_once('func/dbconn.php');
