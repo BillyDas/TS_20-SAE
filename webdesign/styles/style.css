@@ -21,7 +21,6 @@ body
 #chart {
         height: 60vh;
         max-height: 60vh;
-        
 }
 
 #focus {
@@ -32,6 +31,12 @@ body
 #graph{
         height: 80vh;
         max-height: 80vh;
+}
+
+#loadingGraph{
+	height: 100vh;
+	display: none;
+	text-align: center;
 }
 
 .alert{
