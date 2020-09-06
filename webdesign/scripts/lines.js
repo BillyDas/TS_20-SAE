@@ -20,14 +20,10 @@ function initLines() {
 	var focus = d3.select(focusDiv).append("svg");
 
 	//update the graph initally when loaded
-	updateGraph();
+	updateData();
 }
 
-function updateGraph() {
-	//select svg area
-	var svg = d3.select(chartDiv).select("svg");
-	var focus = d3.select(focusDiv).select("svg");
-
+function updateData() {
 	// list of sensors available
 	var yAxisIds = yAxisDataId;
 
@@ -36,8 +32,21 @@ function updateGraph() {
 		yAxisIds[i] = '"' + yAxisIds[i] + '"';
 	}
 
+	fixedYAxisDataId = yAxisDataId.filter(function(data) {
+		return data != '"Time"';
+	  });
+
+	fixedXAxisDataId = xAxisDataId.filter(function(data) {
+		return data != '"Time"';
+	  });
+
+	fetchData(fixedYAxisDataId);
+	fetchSensorData(fixedYAxisDataId);
+}
+
+function fetchData(dataIds) {
 	var url = "http://ts20.billydasdev.com:3000/data?canId=["
-		+ yAxisIds.toString()
+		+ dataIds.toString()
 		+ "]&startTime='" + startDateTime
 		+ "'&endTime='" + endDateTime + "'"
 		+ "&max=200000";
@@ -45,45 +54,52 @@ function updateGraph() {
 	// load the dataset and then draw
 	fetch(url)
 		.then(response => response.json())
-		.then(lineData => {
+		.then(fetchedData => {
 			// data conversion for time and data
-			lineData.forEach(function (d) {
+			fetchedData.forEach(function (d) {
 				d.UTCTimestamp = Date.parse(d.UTCTimestamp);
 				d.Data = parseFloat(d.Data);
+			}).catch(error => {
+				// log the caught error if failure to load database
+				console.log(error);
+			});
+		});
+		return fetchedData;
+}
+
+function fetchSensorData(canIds) {
+	url = "http://ts20.billydasdev.com:3000/desc?canId=[" + canIds.toString() + "]"
+	fetch(url)
+		.then(response => response.json())
+		.then(sensorDesc => {
+			sensorDesc.forEach(function (d) {
+				sensorNameCache[d.CanId] = d.Name + ' (' + d.UnitMetric + ')'
 			})
-
-			url = "http://ts20.billydasdev.com:3000/desc?canId=[" + yAxisIds.toString() + "]"
-			fetch(url)
-				.then(response => response.json())
-				.then(sensorDesc => {
-					sensorDesc.forEach(function (d) {
-						sensorNameCache[d.CanId] = d.Name + ' (' + d.UnitMetric + ')'
-					})
-
-					// draw line chart
-					lineChart(lineData, svg);
-					focusChart(lineData, svg, focus);
-
-					if (firstUpdate) {
-						// add listener to draw on resize
-						window.addEventListener("resize", function () {
-							lineChart(lineData, svg);
-							focusChart(lineData, svg, focus);
-						});
-						firstUpdate = false;
-					}
-
-				})
-				.catch(error => {
-					// log the caught error if failure to load database
-					console.log(error);
-				});
-
 		})
 		.catch(error => {
 			// log the caught error if failure to load database
 			console.log(error);
 		});
+}
+
+function updateGraph(yAxisData) {
+	//select svg area
+	var svg = d3.select(chartDiv).select("svg");
+	var focus = d3.select(focusDiv).select("svg");
+
+
+	// draw line chart
+	lineChart(yAxisData, svg);
+	focusChart(yAxisData, svg, focus);
+
+	if (firstUpdate) {
+		// add listener to draw on resize
+		window.addEventListener("resize", function () {
+			lineChart(yAxisData, svg);
+			focusChart(yAxisData, svg, focus);
+		});
+		firstUpdate = false;
+	}
 }
 
 function lineChart(data, svg) {
