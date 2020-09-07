@@ -58,3 +58,11 @@ body
 #igLive{
         max-width: 30vh;
 }
+
+.mainSensors{
+        overflow: hidden;
+}
+
+.sensorTable{
+        margin-right: 3vh;
+}
