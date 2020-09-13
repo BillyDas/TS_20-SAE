@@ -1,5 +1,6 @@
 var persistentSelection = null;
-var sensorNameCache = {};
+var sensorNameCache = {}; // might be redundant now that i'm storing it all
+var sensorDescCache = [];
 
 var chartDiv = document.getElementById("chart");
 var focusDiv = document.getElementById("focus");
@@ -66,8 +67,13 @@ function updateGraph() {
 			fetch(url)
 				.then(response => response.json())
 				.then(sensorDesc => {
+					sensorDescCache = [];
+					sensorNameCache = {};
+
 					sensorDesc.forEach(function (d) {
-						sensorNameCache[d.CanId] = d.Name + ' (' + d.UnitMetric + ')'
+						sensorDescCache.push(d);
+
+						sensorNameCache[d.CanId] = d.Name + ' (' + d.UnitMetric + ')';
 					})
 
 					// hide loading graphic
@@ -184,15 +190,72 @@ function lineChart(data, svg) {
 		.attr("transform", "translate(" + padding + ",0)")
 		.call(yAxis);
 
+	// group descs by metric
+	function groupBy(arr, prop) {
+		const map = new Map(Array.from(arr, obj => [obj[prop], []]));
+		arr.forEach(obj => map.get(obj[prop]).push(obj));
+		return Array.from(map.values());
+	}
+
+	let groupedSensors = groupBy(sensorDescCache, "UnitName");
+	console.log(groupedSensors);
+
+	let yAxisPadder = 0;
+	for (let key in groupedSensors) {
+		console.log(key);
+		console.log(groupedSensors[key][0]);
+
+		svg.append("text")
+			.attr("transform", "rotate(-90)")
+			.attr("y", padding / 3 - 18*yAxisPadder)
+			.attr("x", 0 - (h / 2))
+			.attr("dy", "1em")
+			.style("text-anchor", "middle")
+			.style("font-size", "1em")
+			.text(groupedSensors[key][0].UnitName + " (" + groupedSensors[key][0].UnitMetric + ")")
+		
+			yAxisPadder++;
+	}
+
 	// text label for the y axis
-	svg.append("text")
-		.attr("transform", "rotate(-90)")
-		.attr("y", padding / 3)
-		.attr("x", 0 - (h / 2))
-		.attr("dy", "1em")
-		.style("text-anchor", "middle")
-		.style("font-size", "1.5em")
-		.text("Value");
+	// svg.append("text")
+	// 	.attr("transform", "rotate(-90)")
+	// 	.attr("y", padding / 3)
+	// 	.attr("x", 0 - (h / 2))
+	// 	.attr("dy", "1em")
+	// 	.style("text-anchor", "middle")
+	// 	.style("font-size", "1.5em")
+	// 	.text(() => {
+
+	// 		let unitNames = {};
+	// 		console.log(sensorDescCache)
+	// 		// determine the different units for charting
+	// 		for (let i in sensorDescCache) {
+	// 			let unitName = sensorDescCache[i].UnitName;
+	// 			let unitMetric = sensorDescCache[i].UnitMetric;
+	// 			unitNames[unitName] = unitMetric;
+	// 		}
+
+
+	// 		if (Object.keys(unitNames).length < 1) {
+	// 			return "Value"
+	// 		}
+
+	// 		if (Object.keys(unitNames).length < 2) {
+	// 			return Object.keys(unitNames)[0];
+	// 		}
+			
+	// 		let yAxisLabel = "";
+	// 		console.log(Object.keys(unitNames));
+	// 		console.log(unitNames);
+	// 		for (let name in Object.keys(unitNames)) {
+	// 			let uName = Object.keys(unitNames)[name];
+	// 			let uMetric = unitNames[uName]
+	// 			yAxisLabel += uName + " (" + uMetric + ")\n";
+	// 		}
+	// 		return yAxisLabel;
+	// 	});
+		//.text("Value");
 
 	// create group names
 	var sensorNames = sumstat.map(function (d) { return d.key })
@@ -271,20 +334,55 @@ function focusChart(data, svg, focus) {
 		.startAngle(0)
 		.endAngle((d, i) => i ? Math.PI : -Math.PI)
 
-	var brushHandle = (g, selection) => g
-		.selectAll(".handle--custom")
+	// var innerLine = d3.line()
+	// 	.length()
+
+	var brushHandle = (g, selection) => 
+	{
+		g.selectAll(".handle--custom")
 		.data([{type: "w"}, {type: "e"}])
 		.join(
-			enter => enter.append("path")
-				.attr("class", "handle--custom")
-				.attr("fill", "#474747")
-				.attr("fill-opacity", 0.8)
-				.attr("stroke-width", 0.5)
-				.attr("cursor", "ew-resize")
-				.attr("d", arc)
+			enter =>
+				enter.append("g")
+					.attr("class", "handle-arc")
+						.append("path")
+						.attr("class", "handle--custom")
+						.attr("fill", "#474747")
+						.attr("fill-opacity", 0.8)
+						.attr("stroke-width", 0.5)
+						.attr("cursor", "ew-resize")
+						.attr("d", arc)
 		)
 		.attr("display", selection === null ? "none" : null)
-		.attr("transform", selection === null ? null : (d, i) => `translate(${selection[i]},${((focusHeight + focusPadding/2)) / 2})`)
+		.attr("transform", selection === null ? null : (d, i) => `translate(${selection[i]},${((focusHeight + focusPadding/2)) / 2})`);
+
+		// g.selectAll(".handle-arc")
+		// .data([{type: "w"}, {type: "e"}])
+		// .join(
+		// 	enter =>
+		// 		enter//.selectAll(".handle-arc")
+		// 			.append("line")
+		// 			// .attr("x1", i)  //<<== change your code here
+		// 			// .attr("y1", focusHeight + focusPadding/3 * 2)
+		// 			// .attr("x2", i)  //<<== and here
+		// 			// .attr("y2", focusPadding/3)
+		// 			.style("stroke-width", 5)
+		// 			.style("stroke", "red")
+		// 			.style("fill", "none")
+		// 			.attr("display", selection === null ? "none" : null)
+		// 			.attr("x1", selection === null ? null : (d, i) => `${selection[i] - 3}`)
+		// 			.attr("y1", selection === null ? null : (d, i) => `${((focusHeight + focusPadding/2)) / 2 - 5}`)
+		// 			.attr("x2", selection === null ? null : (d, i) => `${selection[i] - 3}`)
+		// 			.attr("y2", selection === null ? null : (d, i) => `${((focusHeight + focusPadding/2)) / 2 + 10}`)
+
+		// 			//.attr("transform", selection === null ? null : (d, i) => `translate(${selection[i]},${((focusHeight + focusPadding/2)) / 2})`)
+		// )
+		// .attr("display", selection === null ? "none" : null)
+		// .attr("transform", selection === null ? null : (d, i) => `translate(${selection[i]},${((focusHeight + focusPadding/2)) / 2})`);
+	}
+
+
+
 
 
 	//var margin = { top: 20, right: 20, bottom: 30, left: 40 }
