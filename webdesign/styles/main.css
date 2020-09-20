@@ -70,13 +70,12 @@ body {
     float: left;
 }
 
-#pic {
+.pic {
     max-width: 50em;
     max-height: 50em;
     height: auto;
     width: auto;
 }
-
 
 #navbar p.category {
 	padding: 0 0 0 0.5em;
