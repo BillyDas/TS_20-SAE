@@ -23,6 +23,7 @@ function printRows($result)
     if ($result != null) {
         while ($row = mysqli_fetch_assoc($result)) {
             echo '<tr>
+                <td style="display: none">' .$row['UnitId'] .'</td>
                 <th scope="row">' . $row['UnitName'] . '</th>
                 <td>' . $row['UnitMetric'] . '</td>
               </tr>';
@@ -30,20 +31,25 @@ function printRows($result)
     }
 }
 
-$query  = "SELECT UnitName, UnitMetric FROM SensorUnit";
+$query  = "SELECT UnitId, UnitName, UnitMetric FROM SensorUnit";
 $results = mysqli_query($conn, $query) or trigger_error("Query Failed! SQL: $query - Error: " . mysqli_error($conn), E_USER_ERROR);
 
 ?>
 
 <body>
     <?php include "inc/navbarContents.php" ?>
+    <?php include "inc/unitSettings.html" ?>
     <div id="main" class="mainSensors">
         <h1>Sensor Units</h1>
         <hr>
+        <div id="control">
+            <button id="addButton" type="button" class="btn btn-success"><i class="fa fa-plus" aria-hidden="true"></i> Add</button>
+        </div>
         <div class="sensorTable">
             <table id="sensorTable" class="table table-striped table-responsive-md">
                 <thead>
                     <tr id="cols">
+                        <th scope="col" style="display:none">Id</th>
                         <th scope="col">Name</th>
                         <th scope="col">Metric</th>
                     </tr>
