@@ -253,11 +253,12 @@ function focusChart(data, svg, focus) {
 	var focusHeight = 100
 	var focusPadding = 20
 
-	var arc = d3.arc()
-		.innerRadius(0)
-		.outerRadius(focusHeight / 5 )
-		.startAngle(0)
-		.endAngle((d, i) => i ? Math.PI : -Math.PI)
+	arc = function(d) {
+		var e = +(d.type == "e"),
+			x = e ? 1 : -1,
+			y = focusHeight / 2;
+		return "M" + (.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y -6) + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) + "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
+	}
 
 	var brushHandle = (g, selection) => g
 		.selectAll(".handle--custom")
@@ -268,11 +269,12 @@ function focusChart(data, svg, focus) {
 				.attr("fill", "#474747")
 				.attr("fill-opacity", 0.8)
 				.attr("stroke-width", 0.5)
+				.attr("stroke", "#D9D9D9")
 				.attr("cursor", "ew-resize")
 				.attr("d", arc)
 		)
 		.attr("display", selection === null ? "none" : null)
-		.attr("transform", selection === null ? null : (d, i) => `translate(${selection[i]},${((focusHeight + focusPadding/2)) / 2})`)
+		.attr("transform", selection === null ? null : (d, i) => `translate(${selection[i]},${0 - focusPadding})`);
 
 
 	//var margin = { top: 20, right: 20, bottom: 30, left: 40 }
