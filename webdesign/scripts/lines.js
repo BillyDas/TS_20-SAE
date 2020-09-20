@@ -106,6 +106,10 @@ function updateGraph() {
 }
 
 function lineChart(data, svg) {
+	let groupedSensors = groupBy(sensorDescCache, "UnitName");
+
+	var dynamicPaddingLeft = 18;
+	dynamicPaddingLeft = (groupedSensors.length+1) * dynamicPaddingLeft + 25;
 
 	// clear canvas
 	d3.selectAll("#chart svg > *").remove();
@@ -124,18 +128,20 @@ function lineChart(data, svg) {
 		.key(function (d) { return d.CanId; })
 		.entries(data);
 
+	
+
 	var xScale = null;
 	if (minX != null && maxX != null) {
 		xScale = d3.scaleTime()
 			.domain([minX, maxX])
-			.range([padding, (w - w * 0.1) - padding]) // temp fix for names not fitting
+			.range([dynamicPaddingLeft, (w - w * 0.1) - padding]) // temp fix for names not fitting
 		//.nice();
 	}
 	else {
 		// set x axis to scale based on times
 		xScale = d3.scaleTime()
 			.domain(d3.extent(data, function (d) { return d.UTCTimestamp; }))
-			.range([padding, w - padding])
+			.range([dynamicPaddingLeft, w - padding])
 		//.nice();
 	}
 
@@ -154,7 +160,7 @@ function lineChart(data, svg) {
 	svg.append("text")
 		.attr("transform", "translate(" + (w / 2) + ", " + (h - padding + 40) + ")")
 		.style("text-anchor", "middle")
-		.style("font-size", "1.5em")
+		.style("font-size", "1em")
 		.text("Time");
 
 
@@ -187,7 +193,7 @@ function lineChart(data, svg) {
 
 	// add y axis to the svg
 	svg.append("g")
-		.attr("transform", "translate(" + padding + ",0)")
+		.attr("transform", "translate(" + dynamicPaddingLeft + ",0)")
 		.call(yAxis);
 
 	// group descs by metric
@@ -197,66 +203,6 @@ function lineChart(data, svg) {
 		return Array.from(map.values());
 	}
 
-	let groupedSensors = groupBy(sensorDescCache, "UnitName");
-	console.log(groupedSensors);
-
-	let yAxisPadder = 0;
-	for (let key in groupedSensors) {
-		console.log(key);
-		console.log(groupedSensors[key][0]);
-
-		svg.append("text")
-			.attr("transform", "rotate(-90)")
-			.attr("y", padding / 3 - 18*yAxisPadder)
-			.attr("x", 0 - (h / 2))
-			.attr("dy", "1em")
-			.style("text-anchor", "middle")
-			.style("font-size", "1em")
-			.text(groupedSensors[key][0].UnitName + " (" + groupedSensors[key][0].UnitMetric + ")")
-		
-			yAxisPadder++;
-	}
-
-	// text label for the y axis
-	// svg.append("text")
-	// 	.attr("transform", "rotate(-90)")
-	// 	.attr("y", padding / 3)
-	// 	.attr("x", 0 - (h / 2))
-	// 	.attr("dy", "1em")
-	// 	.style("text-anchor", "middle")
-	// 	.style("font-size", "1.5em")
-	// 	.text(() => {
-
-	// 		let unitNames = {};
-	// 		console.log(sensorDescCache)
-	// 		// determine the different units for charting
-	// 		for (let i in sensorDescCache) {
-	// 			let unitName = sensorDescCache[i].UnitName;
-	// 			let unitMetric = sensorDescCache[i].UnitMetric;
-	// 			unitNames[unitName] = unitMetric;
-	// 		}
-
-
-	// 		if (Object.keys(unitNames).length < 1) {
-	// 			return "Value"
-	// 		}
-
-	// 		if (Object.keys(unitNames).length < 2) {
-	// 			return Object.keys(unitNames)[0];
-	// 		}
-			
-	// 		let yAxisLabel = "";
-	// 		console.log(Object.keys(unitNames));
-	// 		console.log(unitNames);
-	// 		for (let name in Object.keys(unitNames)) {
-	// 			let uName = Object.keys(unitNames)[name];
-	// 			let uMetric = unitNames[uName]
-	// 			yAxisLabel += uName + " (" + uMetric + ")\n";
-	// 		}
-	// 		return yAxisLabel;
-	// 	});
-		//.text("Value");
-
 	// create group names
 	var sensorNames = sumstat.map(function (d) { return d.key })
 
@@ -265,12 +211,45 @@ function lineChart(data, svg) {
 		.domain(sensorNames)
 		.range(d3.schemeCategory10);
 
+	// sorry
+	let yAxisPadder = 0;
+	for (let key in groupedSensors) {
+
+		svg.append("text")
+			.attr("transform", "rotate(-90)")
+			.attr("y", 0 + 18*yAxisPadder)
+			.attr("x", 0 - (h / 2) + (h/2/5))
+			.attr("dy", "1em")
+			.style("text-anchor", "end")
+			.style("font-size", "1em")
+			.text(groupedSensors[key][0].UnitName + " (" + groupedSensors[key][0].UnitMetric + ")")
+		
+		//var linesToFit = groupedSensors[key].length;
+		let keyUnitCount = 0;
+		for (let sensorsWithKeyUnit in groupedSensors[key])
+		{
+			// really sorry
+			svg.append("line")
+				.attr("transform", "rotate(-90)")
+				.attr("x1", 0 - (h / 2) + (h / 10) + 3 + (25*keyUnitCount))
+				.attr("y1", -5 + 18*(yAxisPadder+1))
+				.attr("x2", 0 - (h / 2) + (h / 10) + 23 + (25*keyUnitCount))
+				.attr("y2", -5 + 18*(yAxisPadder+1)) 
+				.attr("stroke", function (d) { return color(groupedSensors[key][sensorsWithKeyUnit].CanId); })
+				.attr("stroke-width", 1.5)
+
+			keyUnitCount++
+		}
+		
+		yAxisPadder++;
+	}
+
 	svg.append("clipPath")
 		.attr("id", "chartClip")
 		.append("rect")
-		.attr("x", 0 + padding)
+		.attr("x", 0 + dynamicPaddingLeft)
 		.attr("y", 0)
-		.attr("width", (w - w * 0.1) - (2 * padding))
+		.attr("width", (w - w * 0.1) - (dynamicPaddingLeft + padding))
 		.attr("height", chartDiv.clientHeight)
 		.attr("fill", "#ccffff");
 
@@ -448,7 +427,6 @@ function focusChart(data, svg, focus) {
 	focus.append("g")
 		.attr("transform", "translate(0, " + (focusHeight + 1) + ")")
 		.call(xAxis, xScale, focusHeight);
-	// .call(xAxis);
 
 	focus.selectAll(".line")
 		.data(sumstat)
@@ -466,54 +444,13 @@ function focusChart(data, svg, focus) {
 		});
 
 	const gb = focus.append("g")
-		//.attr("id", "focusSlider") // remove when performance fixed (????????????)
 		.call(brush)
-	//.call(brush.move, defaultSelection); // this line resets the focus area on resize,, need to fix...
-
-
-	// var semi = d3.arc()
-	// 	.outerRadius(focusHeight / 2)
-	// 	.startAngle(0)
-	// 	.endAngle(function(d, i) { 
-	// 		console.log(d)
-	// 		console.log(i)
-	// 		return i ? -Math.PI : Math.PI;
-	// 	});
-
-	// gb.selectAll(".handle").append("path")
-	// 	.attr("transform", "translate(0," +  focusHeight / 2 + ")")
-	// 	.attr("d", semi);
-
-	// gb.selectAll(".handle").append("rect")
-	// 	.attr("width", "5")
-	// 	.attr("height", "20")
-	// 	.attr("fill", "#000000")
 
 	if (persistentSelection === null) {
 		gb.call(brush.move, defaultSelection)
 	} else {
 		gb.call(brush.move, [xScale(persistentSelection[0]), xScale(persistentSelection[1])])
 	}
-
-	// add when performance fixed (????????????)
-	// gb.selectAll(".selection")
-	// 	.attr("id", "focusSlider");
-
-	// huh, this was actually unnecessary
-	// persistentObserver = new MutationObserver(function(mutations) {
-	// 	mutations.forEach(function(mutation) {
-	// 		if (mutation.type == "attributes") {
-	// 			[minX, maxX] = focus.property("value")
-	// 			minY = d3.min(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
-	// 			maxY = d3.max(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
-	// 			// desperately needs to be rewritten to just change the domain, nothing else, but it works for now...
-	// 			lineChart( data, svg )
-	// 		}
-	// 	});
-	// });
-	// persistentObserver.observe(document.getElementById("focusSlider"), {
-	// 	attributes: true //configure it to listen to attribute changes
-	// });
 
 	function brushed() {
 		if (d3.event.selection) {
