@@ -151,8 +151,8 @@
            <legend>Add New Sensors Form:</legend>
  					 <label name="sensorName">What Is The Sensors Name (Sensor Name in Sensors Table)?</label><input id="sensorName" name="sensorName"/><br />
  					 <label name="sensorCanID">What Is The Sensors CANID (CanId in Sensors Table)?</label>
-           <select id="sensorCanID">
-             <option value="" selected>No CanID</option>
+           <select name="sensorCanID" id="sensorCanID">
+             <option value="none" selected>No CanID</option>
              <?php
              $query = "SELECT SensorData.CanId FROM SensorData WHERE SensorData.CanId NOT IN (SELECT Sensors.CanId FROM Sensors) GROUP BY SensorData.CanId";
              $results = mysqli_query($conn, $query) or trigger_error("Query Failed! SQL: $query - Error: ".mysqli_error($conn), E_USER_ERROR);
@@ -176,9 +176,9 @@
               <br />
 
 
-           <label for="sensortypeID">What Is The Sensor Types ID (Sensor Type Id in SensorType Table) if the sensory type you have doesent exist please select the following checkbox)?</label>
-           <select id="sensortypeID">
-             <option value="" selected>No ID</option>
+           <label for="sensortypeID">What Is The Sensor Types ID (Sensor Type Id in SensorType Table) if the sensor type you have doesent exist please select the following checkbox)?</label>
+           <select name="sensortypeID" id="sensortypeID">
+             <option value="none" selected="selected" >No ID</option>
              <?php
              $query = "SELECT SensorTypeId FROM SensorType";
              $results = mysqli_query($conn, $query) or trigger_error("Query Failed! SQL: $query - Error: ".mysqli_error($conn), E_USER_ERROR);
@@ -201,14 +201,13 @@
               ?>
               <br />
 
-
               <label id="nosensortypeid" for="notypeid">No Sensor Type Id</label>
               <input type="checkbox" id="notypeid" name="notypeid" value="notypeid"></input><br>
 
-              <label id="sensordescriptionlbl" name="sensordescription">What Is The Sensors Description (Description in SensorType Table)</label><textarea id="sensordescription" rows="2" cols="50"></textarea><br />
+              <label id="sensordescriptionlbl" name="sensordescription">What Is The Sensors Description (Description in SensorType Table)</label><textarea id="sensordescription" name="sensordescription" rows="2" cols="50" maxlength="249"></textarea><br />
               <label id="sensorunitidlbl" for="sensorunitid">What is the sensors measurement UnitID (UnitID in SensorUnit Table) if the UnitID doesent exist please select the following checkbox</label>
               <select id="sensorunitid">
-                <option value="" selected>No ID</option>
+                <option value="none" selected>No ID</option>
                 <?php
                 $query = "SELECT UnitId FROM SensorUnit";
                 $results = mysqli_query($conn, $query) or trigger_error("Query Failed! SQL: $query - Error: ".mysqli_error($conn), E_USER_ERROR);
@@ -271,7 +270,7 @@
      }
 
      stid.onchange = function() { // listen for event change
-      if(stid.value !== "") { // check state
+      if(stid.value !== "none") { // check state
         Suid.style.visibility = 'hidden';
         nsui.style.visibility = 'hidden';
         chekboxNoSensorUnitId.style.visibility = 'hidden';
