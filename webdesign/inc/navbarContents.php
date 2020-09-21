@@ -7,5 +7,4 @@
     <a href="rpmTorque.php"><img src="img/rpmtorque.png" id="pic"><span id="inlinespan">RPM and Torque</span></a>
     <a href="sensors.php"><i class="fa fa-plug" aria-hidden="true"></i><span id="inlinespan">Sensors</span></a>
     <a href="units.php"><i class="fa fa-list" aria-hidden="true"></i><span id="inlinespan">Units</span></a>
-    <a href="addnewsensors.php"><img src="img/add.png" id="pic"><span id="inlinespan">Add a new sensor</span></a>
 </div>

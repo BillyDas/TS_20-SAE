@@ -1,0 +1,73 @@
+<div class="modal fade" id="sensorSettings" tabindex="-1" role="dialog" aria-labelledby="settingsModalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title addSensor" id="sensorModalTitleAdd"><i class="fa fa-plus"></i> Add Sensor</h5>
+                <h5 class="modal-title updateSensor" id="sensorModalTitleUpdate"><i class="fa fa-pencil"></i> Update Sensor</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="settings" class="modal-body">
+                <table>
+                    <tbody id="selectCanId">
+                        <tr>
+                            <td>
+                                <label for="txtName">CanId: </label>
+                            </td>
+                            <td>
+                                <select id="spCanId" class="selectpicker" data-live-search="true" data-size="5" title="Select Can Id">
+                                    <option value="custom">Custom</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tbody id="customCanId">
+                        <tr>
+                            <td>
+                                <label for="txtName">Custom CanId: </label>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="txtId" placeholder="Can Id (Eg. 0x34)">
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <label for="txtName">Name: </label>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="txtName" placeholder="Name">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="txtDescription">Description: </label>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="txtMetric" placeholder="Description">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="txtUnit">Unit: </label>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="txtMetric" placeholder="Unit">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="btnDeleteSettings" type="button" class="btn btn-danger updateSensor"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</button>
+                <button id="btnSaveSettings" type="button" class="btn btn-primary updateSensor"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
+                <button id="btnAddSettings" type="button" class="btn btn-primary addSensor"><i class="fa fa-floppy-o" aria-hidden="true"></i> Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="scripts/sensorSettings.js"></script>

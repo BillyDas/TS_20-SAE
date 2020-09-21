@@ -40,11 +40,12 @@ $results = mysqli_query($conn, $query) or trigger_error("Query Failed! SQL: $que
 
 <body>
     <?php include "inc/navbarContents.php" ?>
+    <?php include "inc/sensorSettings.html" ?>
     <div id="main" class="mainSensors">
         <h1>Sensors</h1>
         <hr>
         <div id="control">
-            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#settingsModal"><i class="fa fa-plus" aria-hidden="true"></i> Add</button>
+        <button id="addButton" type="button" class="btn btn-success"><i class="fa fa-plus" aria-hidden="true"></i> Add</button>
         </div>
         <div class="sensorTable">
             <table id="sensorTable" class="table table-striped table-responsive-md">

@@ -3,7 +3,8 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="unitModalTitle"><i class="fa fa-plus"></i> Add Unit</h5>
+                <h5 class="modal-title addUnit" id="unitModalTitleAdd"><i class="fa fa-plus"></i> Add Unit</h5>
+                <h5 class="modal-title updateUnit" id="unitModalTitleUpdate"><i class="fa fa-pencil"></i> Update Unit</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -13,7 +14,7 @@
                     <tbody>
                         <tr style="display:none">
                             <td>
-                                <label for="txtName">Id: </label>
+                                <label for="txtId">Id: </label>
                             </td>
                             <td>
                                 <input type="text" class="form-control" id="txtId" placeholder="Id">
@@ -40,7 +41,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <!--<button id="btnSaveSettings" type="button" class="btn btn-primary">Update Graph</button>-->
+                <button id="btnDeleteSettings" type="button" class="btn btn-danger updateUnit"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</button>
+                <button id="btnSaveSettings" type="button" class="btn btn-primary updateUnit"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
+                <button id="btnAddSettings" type="button" class="btn btn-primary addUnit"><i class="fa fa-floppy-o" aria-hidden="true"></i> Add</button>
             </div>
         </div>
     </div>
