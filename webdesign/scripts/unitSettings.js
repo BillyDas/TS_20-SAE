@@ -31,16 +31,18 @@ function handleButtonClick(){
 }
 
 function handleRowClick(row){
-    var data = [];
-    for(var i = 0; i < row.children.length; i++){
-        data.push(row.children[i].innerHTML);
+    if (row.id != "cols"){
+        var data = [];
+        for(var i = 0; i < row.children.length; i++){
+            data.push(row.children[i].innerHTML);
+        }
+        $('.addUnit').hide();
+        $('.updateUnit').show();
+        $('#txtId').val(data[0]);
+        $('#txtName').val(data[1]);
+        $('#txtMetric').val(data[2]);
+        $('#unitSettings').modal('show');
     }
-    $('.addUnit').hide();
-    $('.updateUnit').show();
-    $('#txtId').val(data[0]);
-    $('#txtName').val(data[1]);
-    $('#txtMetric').val(data[2]);
-    $('#unitSettings').modal('show');
 }
 
 function addUnit(){

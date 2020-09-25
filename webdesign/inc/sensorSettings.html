@@ -4,68 +4,127 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title addSensor" id="sensorModalTitleAdd"><i class="fa fa-plus"></i> Add Sensor</h5>
-                <h5 class="modal-title updateSensor" id="sensorModalTitleUpdate"><i class="fa fa-pencil"></i> Update Sensor</h5>
+                <h5 class="modal-title updateSensor" id="sensorModalTitleUpdate"><i class="fa fa-pencil"></i> Update
+                    Sensor</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+            <div id="errorAlert"></div>
             <div id="settings" class="modal-body">
-                <table>
-                    <tbody id="selectCanId">
-                        <tr>
-                            <td>
-                                <label for="txtName">CanId: </label>
-                            </td>
-                            <td>
-                                <select id="spCanId" class="selectpicker" data-live-search="true" data-size="5" title="Select Can Id">
-                                    <option value="custom">Custom</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                    <tbody id="customCanId">
-                        <tr>
-                            <td>
-                                <label for="txtName">Custom CanId: </label>
-                            </td>
-                            <td>
-                                <input type="text" class="form-control" id="txtId" placeholder="Can Id (Eg. 0x34)">
-                            </td>
-                        </tr>
-                    </tbody>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <label for="txtName">Name: </label>
-                            </td>
-                            <td>
-                                <input type="text" class="form-control" id="txtName" placeholder="Name">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="txtDescription">Description: </label>
-                            </td>
-                            <td>
-                                <input type="text" class="form-control" id="txtMetric" placeholder="Description">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="txtUnit">Unit: </label>
-                            </td>
-                            <td>
-                                <input type="text" class="form-control" id="txtMetric" placeholder="Unit">
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <form class="needs-validation" novalidate>
+                    <table>
+                        <tbody id="selectCanId">
+                            <tr>
+                                <td>
+                                    <label for="txtName">CanId: </label>
+                                </td>
+                                <td>
+                                    <select id="spCanId" class="selectpicker form-control" data-live-search="true"
+                                        data-size="5" title="Select Can Id" required>
+                                        <option value="custom">Custom</option>
+
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please Select an Option!
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tbody id="customCanId">
+                            <tr>
+                                <td>
+                                    <label for="txtCusomCanId">Custom CanId: </label>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" id="txtCanId" placeholder="Can Id (Eg. 0x34)">
+                                    <div class="invalid-feedback">
+                                        Please Enter a valid CAN Id!
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <label for="txtName">Name: </label>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" id="txtName" placeholder="Name" required>
+                                    <div class="invalid-feedback">
+                                        Please Enter a valid Name!
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="txtDescription">Description: </label>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" id="txtDescription"
+                                        placeholder="Description" required>
+                                    <div class="invalid-feedback">
+                                        Please Enter a valid Description!
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <label for="txtUnit">Unit: </label>
+                                </td>
+                                <td>
+                                    <select id="spUnit" class="selectpicker" data-live-search="true" data-size="5"
+                                        title="Select Unit" required>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please Select an Option!
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tbody id="customUnit">
+                            <tr>
+                                <td>
+                                    <label for="txtUnitName">Unit Name: </label>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" id="txtUnitName"
+                                        placeholder="Unit Name (Eg. Percentage)">
+                                    <div class="invalid-feedback">
+                                        Please Enter a valid Unit Name!
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="txtUnitMetric">Unit Metric: </label>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" id="txtUnitMetric"
+                                        placeholder="Unit Metric (Eg. %)">
+                                    <div class="invalid-feedback">
+                                        Please Enter a valid Unit Metric!
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button id="btnDeleteSettings" type="button" class="btn btn-danger updateSensor"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</button>
-                <button id="btnSaveSettings" type="button" class="btn btn-primary updateSensor"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
-                <button id="btnAddSettings" type="button" class="btn btn-primary addSensor"><i class="fa fa-floppy-o" aria-hidden="true"></i> Add</button>
+                <button id="btnDeleteSettings" type="button" class="btn btn-danger updateSensor"><i
+                        class="fa fa-trash-o" aria-hidden="true"></i> Delete</button>
+                <button id="btnSaveSettings" type="button" class="btn btn-primary updateSensor"><i
+                        class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
+                <button id="btnAddSettings" type="button" class="btn btn-primary addSensor"><i class="fa fa-floppy-o"
+                        aria-hidden="true"></i> Add</button>
+                <button id="btnLoading" type="button" class="btn btn-primary" style="display: none;" disabled></i>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Loading...</button>
             </div>
         </div>
     </div>
