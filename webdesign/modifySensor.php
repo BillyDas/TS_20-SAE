@@ -72,6 +72,7 @@ function addSensor($conn)
     }
 }
 
+// TO BE FIXED STILL COPIED FROM UNIT UPDATE
 function updateSensor($conn)
 {
     if (isvalid($_POST["CanId"]) && isvalid($_POST["Name"]) && isvalid($_POST["Description"]) && isvalid($_POST["UnitId"]) && isvalid($_POST["SensorTypeId"])) {
@@ -85,24 +86,43 @@ function updateSensor($conn)
         $stmt->bind_param('sii', $Description, $UnitId, $SensorTypeId);
         $stmt->execute() or printError("Query Failed! Error: " . mysqli_error($conn), E_USER_ERROR);
         $conn->commit();
+        $affRows = $stmt->affected_rows;
         $stmt = $conn->prepare("UPDATE `Sensors` SET `CanId` = ?, `Name` = ? WHERE `Sensors`.`SensorTypeId` = ?");
         $stmt->bind_param('ssi', $CanId, $Name, $SensorTypeId);
         $stmt->execute() or printError("Query Failed! Error: " . mysqli_error($conn), E_USER_ERROR);
         $conn->commit();
-        printf("%d Row updated.\n", $stmt->affected_rows);
+        printf("%d Row updated.\n", $stmt->affected_rows + $affRows);
     }
 }
 
 function deleteSensor($conn)
 {
-    if (isvalid($_POST["SensorId"])) {
-        $SensorId = sanitizeData($_POST["SensorId"]);
-
-        $stmt = $conn->prepare("DELETE FROM `SensorSensor` WHERE `SensorSensor`.`SensorId` = ?");
-        $stmt->bind_param('i', $SensorId);
+    if (isvalid($_POST["CanId"])) {
+        $CanId = sanitizeData($_POST["CanId"]);
+        $SensorTypeId = null;
+        $stmt = $conn->prepare("SELECT `SensorTypeId` FROM `Sensors` WHERE `CanId` = ?");
+        $stmt->bind_param('s', $CanId);
+        $stmt->execute() or printError("Query Failed! Error: " . mysqli_error($conn), E_USER_ERROR);
+        ($stmt_result = $stmt->get_result()) or printError($stmt->error, E_USER_ERROR);
+        if ($stmt_result->num_rows>0) {
+            if($row = $stmt_result->fetch_assoc()) {
+                $SensorTypeId = $row['SensorTypeId'];
+            }
+            else{
+                printError('Error: Unable to Fetch SensorTypeId');
+            }
+        }
+        $rowDeleted = 0;
+        $stmt = $conn->prepare("DELETE FROM `Sensors` WHERE `Sensors`.`CanId` = ?");
+        $stmt->bind_param('s', $CanId);
         $stmt->execute() or printError("Query Failed! Error: " . mysqli_error($conn), E_USER_ERROR);
         $conn->commit();
-        printf("%d Row deleted.\n", $stmt->affected_rows);
+        $rowDeleted = $stmt->affected_rows;
+        $stmt = $conn->prepare("DELETE FROM `SensorType` WHERE `SensorType`.`SensorTypeId` = ?");
+        $stmt->bind_param('i', $SensorTypeId);
+        $stmt->execute() or printError("Query Failed! Error: " . mysqli_error($conn), E_USER_ERROR);
+        $conn->commit();
+        printf("%d Row deleted.\n", $stmt->affected_rows + $rowDeleted);
     }
 }
 

@@ -1,13 +1,19 @@
 var undefinedCanIds = null;
+var avaliableUnits = null;
 var _errorMessage = "";
 
 function initSensorSettings() {
     $('#customCanId').hide();
     $('#customUnit').hide();
 
-
     $('#sensorTable tr').click(function () {
         handleRowClick(this);
+    });
+
+    $('#sensorTable').DataTable().on('draw', function () {
+        $('#sensorTable tr').click(function () {
+            handleRowClick(this);
+        });
     });
 
     $('#addButton').click(function () {
@@ -15,7 +21,7 @@ function initSensorSettings() {
     });
 
     $('#spCanId').on('changed.bs.select', function () {
-        handleCanIdChange();        
+        handleCanIdChange();
     });
 
     $('#spUnit').on('changed.bs.select', function () {
@@ -26,11 +32,22 @@ function initSensorSettings() {
         addSensor();
     });
 
+    $('#btnDeleteSettings').click(function () {
+        deleteSensor();
+    });
+
+    $('#btnSaveSettings').click(function () {
+        updateSensor();
+    });
+
+
+
     initSelectPickers();
 }
 
 function handleButtonClick() {
     resetCanIdSelectPicker();
+    resetUnitSelectPicker();
     $('#spCanId').selectpicker('val', '');
     $('#txtName').val("");
     $('#txtDescription').val("");
@@ -67,12 +84,14 @@ function handleRowClick(row) {
             data.push(row.children[i].innerHTML);
         }
         resetCanIdSelectPicker(data[0]);
+        resetUnitSelectPicker(true);
         $('.addSensor').hide();
         $('.updateSensor').show();
         $('#spCanId').selectpicker('val', data[0]);
         $('#txtName').val(data[1]);
         $('#txtDescription').val(data[2]);
         $('#spUnit').selectpicker('val', data[5]);
+        $('#txtSensorTypeId').val(data[6])
         $('#sensorSettings').modal('show');
     }
 }
@@ -88,15 +107,23 @@ function resetCanIdSelectPicker(extraOption) {
     $('#spCanId').selectpicker('refresh');
 }
 
+function resetUnitSelectPicker(removeCustom) {
+    if (removeCustom) {
+        $('#spUnit').html(avaliableUnits);
+    }
+    else {
+        $('#spUnit').html('<option value="custom">Custom</option>' + avaliableUnits);
+    }
+    $('#spUnit').selectpicker('refresh');
+}
+
 function initSelectPickers() {
     $.ajax({
         url: "func/getUndefinedCanId.php",
         type: 'post',
         success: function (response) {
             undefinedCanIds = response;
-            $('#spCanId').empty();
-            $('#spCanId').html('<option value="custom">Custom</option>' + response);
-            $('#spCanId').selectpicker('refresh');
+            resetCanIdSelectPicker();
         }
     });
 
@@ -104,9 +131,8 @@ function initSelectPickers() {
         url: "func/getUnits.php",
         type: 'post',
         success: function (response) {
-            $('#spUnit').empty();
-            $('#spUnit').html('<option value="custom">Custom</option>' + response);
-            $('#spUnit').selectpicker('refresh');
+            avaliableUnits = response;
+            resetUnitSelectPicker();
         }
     });
 }
@@ -142,18 +168,61 @@ function addSensor() {
         }
         requestModification(data);
     }
-    else{
+    else {
         $("#settings input[id*='txt']").change(function () {
             validateForm();
         });
         $('#spCanId').on('changed.bs.select', function () {
-            validateForm();      
+            validateForm();
         });
-    
+
         $('#spUnit').on('changed.bs.select', function () {
             validateForm();
         });
     }
+}
+
+function updateSensor() {
+    if (validateForm()) {
+        $('#btnSaveSettings').hide();
+        $('#btnLoading').show();
+        if ($('#spCanId').val() == "custom") {
+            canIdVal = $('#txtCanId').val();
+        }
+        else {
+            canIdVal = $('#spCanId').val();
+        }
+        data = {
+            Mode: 'update',
+            CanId: canIdVal,
+            Name: $('#txtName').val(),
+            Description: $('#txtDescription').val(),
+            UnitId: $('#spUnit').val(),
+            SensorTypeId: $('#txtSensorTypeId').val()
+        };
+
+        requestModification(data);
+    }
+    else {
+        $("#settings input[id*='txt']").change(function () {
+            validateForm();
+        });
+        $('#spCanId').on('changed.bs.select', function () {
+            validateForm();
+        });
+
+        $('#spUnit').on('changed.bs.select', function () {
+            validateForm();
+        });
+    }
+}
+
+function deleteSensor() {
+    data = {
+        Mode: 'delete',
+        CanId: $('#spCanId').val(),
+    };
+    requestModification(data);
 }
 
 function requestModification(formData) {
@@ -165,6 +234,7 @@ function requestModification(formData) {
         complete: async function (jqXHR, status) {
             if (jqXHR.status == 200) {
                 //console.log(jqXHR);
+                sessionStorage.setItem('responseMessage', jqXHR.responseText);
                 location.reload();
             }
             else {
@@ -173,7 +243,13 @@ function requestModification(formData) {
                 }
                 else {
                     if (jqXHR.responseText != "") {
-                        showErrorMessage(jqXHR.responseText.split(': ')[1]?.replace('!', ''));
+                        if (jqXHR.responseText.includes('Error: Duplicate entry')) {
+                            sessionStorage.setItem('responseMessage', '1 Row Updated. (Cannot Update Linked Sensor)');
+                            location.reload();
+                        }
+                        else {
+                            showErrorMessage(jqXHR.responseText.split(': ')[1]?.replace('!', ''));
+                        }
                     }
                     else {
                         showErrorMessage("Unknown Error Occured");
@@ -279,7 +355,13 @@ function showErrorMessage(message) {
     }, 50);
     setTimeout(function () {
         $('#btnLoading').hide();
-        $('#btnAddSettings').show();
+        if ($('#sensorModalTitleAdd').attr('style').includes('display: none')) {
+            $('#btnSaveSettings').show();
+        }
+        else {
+            $('#btnAddSettings').show();
+        }
+
     }, 1000);
 }
 

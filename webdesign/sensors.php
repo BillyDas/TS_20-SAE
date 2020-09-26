@@ -29,12 +29,13 @@ function printRows($result)
                 <td>' . $row['UnitName'] . '</td>
                 <td>' . $row['UnitMetric'] . '</td>
                 <td style="display: none">' .$row['UnitId'] .'</td>
+                <td style="display: none">' .$row['SensorTypeId'] .'</td>
               </tr>';
         }
     }
 }
 
-$query  = "SELECT s.CanId, s.Name, st.Description, su.UnitName, su.UnitMetric, su.UnitId FROM Sensors AS s INNER JOIN SensorType AS st ON s.SensorTypeId = st.SensorTypeId INNER JOIN SensorUnit AS su ON st.UnitId = su.UnitId";
+$query  = "SELECT s.CanId, s.Name, st.Description, su.UnitName, su.UnitMetric, su.UnitId, s.SensorTypeId FROM Sensors AS s INNER JOIN SensorType AS st ON s.SensorTypeId = st.SensorTypeId INNER JOIN SensorUnit AS su ON st.UnitId = su.UnitId";
 $results = mysqli_query($conn, $query) or trigger_error("Query Failed! SQL: $query - Error: " . mysqli_error($conn), E_USER_ERROR);
 
 ?>
@@ -42,7 +43,8 @@ $results = mysqli_query($conn, $query) or trigger_error("Query Failed! SQL: $que
 <body>
     <?php include "inc/navbarContents.php" ?>
     <?php include "inc/sensorSettings.html" ?>
-    <div id="main" class="mainSensors">        
+    <div id="main" class="mainSensors">      
+        <div id="alert"><?php include "inc/successAlert.html" ?></div>  
         <h1>Sensors</h1>
         <hr>
         <div id="control">
@@ -58,6 +60,7 @@ $results = mysqli_query($conn, $query) or trigger_error("Query Failed! SQL: $que
                         <th scope="col">Unit</th>
                         <th scope="col">Unit Metric</th>
                         <th scope="col" style="display:none">Unit Id</th>
+                        <th scope="col" style="display:none">Sensor Type Id</th>
                     </tr>
                 </thead>
                 <tbody>
