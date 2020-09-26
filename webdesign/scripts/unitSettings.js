@@ -4,6 +4,12 @@ function initUnitSettings() {
         handleRowClick(this);
     });
 
+    $('#sensorTable').DataTable().on('draw', function () {
+        $('#sensorTable tr').click(function () {
+            handleRowClick(this);
+        });
+    });
+
     $('#addButton').click(function(){
         handleButtonClick();
     });
@@ -19,6 +25,11 @@ function initUnitSettings() {
     $('#btnAddSettings').click(function(){
         addUnit();
     });
+
+    $('#unitSettings').on('hidden.bs.modal', function () {
+        clearValidation($('#txtName'));
+        clearValidation($('#txtMetric'));
+      })
 }
 
 function handleButtonClick(){
@@ -46,22 +57,40 @@ function handleRowClick(row){
 }
 
 function addUnit(){
-    data = {
-        Mode: 'add',
-        UnitName: $('#txtName').val(),
-        UnitMetric: $('#txtMetric').val()
-    };
-    requestModification(data);
+    if (validateForm()){
+        $('#btnAddSettings').hide();
+        $('#btnLoading').show();
+        data = {
+            Mode: 'add',
+            UnitName: $('#txtName').val(),
+            UnitMetric: $('#txtMetric').val()
+        };
+        requestModification(data);
+    }
+    else {
+        $("#settings input[type*='text']").change(function () {
+            validateForm();
+        });
+    }
 }
 
 function updateUnit(){
-    data = {
-        Mode: 'update',
-        UnitId: $('#txtId').val(),
-        UnitName: $('#txtName').val(),
-        UnitMetric: $('#txtMetric').val()
-    };
-    requestModification(data);
+    if (validateForm()){
+        $('#btnSaveSettings').hide();
+        $('#btnLoading').show();
+        data = {
+            Mode: 'update',
+            UnitId: $('#txtId').val(),
+            UnitName: $('#txtName').val(),
+            UnitMetric: $('#txtMetric').val()
+        };
+        requestModification(data);
+    }
+    else {
+        $("#settings input[type*='text']").change(function () {
+            validateForm();
+        });
+    }
 }
 
 function deleteUnit(){
@@ -89,7 +118,98 @@ function requestModification(formData){
     })
 }
 
+function requestModification(formData) {
+    $.ajax({
+        type: "POST",
+        url: "modifyUnit.php",
+        timeout: 3000,
+        data: formData,
+        complete: async function (jqXHR, status) {
+            if (jqXHR.status == 200) {
+                //console.log(jqXHR);
+                sessionStorage.setItem('responseMessage', jqXHR.responseText);
+                location.reload();
+            }
+            else {
+                if (status == "timeout") {
+                    showErrorMessage("Request Timed out.");
+                }
+                else {
+                    if (jqXHR.responseText != "") {
+                            showErrorMessage(jqXHR.responseText.split(': ')[1]?.replace('!', ''));
+                    }
+                    else {
+                        showErrorMessage("Unknown Error Occured");
+                    }
 
+                }
+            }
+        }
+    });
+}
 
+function validateForm() {
+    var result = true;
 
-window.onload = initUnitSettings;
+    if ($('#txtName').val() == "") {
+        result = false;
+        addInvalidClass($('#txtName'));
+    }
+    else {
+        clearValidation($('#txtName'));
+    }
+
+    if ($('#txtMetric').val() == "") {
+        result = false;
+        addInvalidClass($('#txtMetric'));
+    }
+    else {
+        clearValidation($('#txtMetric'));
+    }
+
+    return result;
+}
+
+function addInvalidClass(element) {
+    if (element.is('select')) {
+        element = element.parent();
+    }
+
+    if (!element.attr('class').includes('is-invalid')) {
+        element.addClass('is-invalid');
+    }
+}
+
+function clearValidation(element) {
+    if (element.is('select')) {
+        element = element.parent();
+    }
+
+    if (element.attr('class').includes('is-invalid')) {
+        element.removeClass('is-invalid');
+    }
+}
+
+function showErrorMessage(message) {
+    window._errorMessage = message;
+    $('#errorAlert').load('inc/errorAlert.html');
+    setTimeout(function () {
+        $('#errorMsg').empty();
+        $('#errorMsg').html(window._errorMessage);
+    }, 50);
+    setTimeout(function () {
+        $('#btnLoading').hide();
+        if ($('#unitModalTitleAdd').attr('style').includes('display: none')) {
+            $('#btnSaveSettings').show();
+        }
+        else {
+            $('#btnAddSettings').show();
+        }
+
+    }, 1000);
+}
+
+// run init on window load
+$(document).ready(function () {
+    initUnitSettings();
+});

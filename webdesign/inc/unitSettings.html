@@ -9,6 +9,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+            <div id="errorAlert"></div>
             <div id="settings" class="modal-body">
                 <table>
                     <tbody>
@@ -17,7 +18,7 @@
                                 <label for="txtId">Id: </label>
                             </td>
                             <td>
-                                <input type="text" class="form-control" id="txtId" placeholder="Id">
+                                <input type="hidden" class="form-control" id="txtId" placeholder="Id">
                             </td>
                         </tr>
                         <tr>
@@ -44,6 +45,9 @@
                 <button id="btnDeleteSettings" type="button" class="btn btn-danger updateUnit"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</button>
                 <button id="btnSaveSettings" type="button" class="btn btn-primary updateUnit"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save</button>
                 <button id="btnAddSettings" type="button" class="btn btn-primary addUnit"><i class="fa fa-floppy-o" aria-hidden="true"></i> Add</button>
+                <button id="btnLoading" type="button" class="btn btn-primary" style="display: none;" disabled></i>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Loading...</button>
             </div>
         </div>
     </div>

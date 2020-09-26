@@ -40,6 +40,7 @@ $results = mysqli_query($conn, $query) or trigger_error("Query Failed! SQL: $que
     <?php include "inc/navbarContents.php" ?>
     <?php include "inc/unitSettings.html" ?>
     <div id="main" class="mainSensors">
+        <div id="alert"><?php include "inc/successAlert.html" ?></div>  
         <h1>Sensor Units</h1>
         <hr>
         <div id="control">
