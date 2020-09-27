@@ -40,8 +40,6 @@ function initSensorSettings() {
         updateSensor();
     });
 
-
-
     initSelectPickers();
 }
 
@@ -273,16 +271,19 @@ function validateForm() {
     }
 
     if ($('#spCanId').val() == "custom") {
-        if ($('#txtCanId').val() == "") {
+        if ($('#txtCanId').val() == "" ||
+            !$('#txtCanId').val().match(/^0x[0-9a-f]{1,4}$/i)) {
             result = false;
             addInvalidClass($('#txtCanId'));
         }
         else {
             clearValidation($('#txtCanId'));
+            $('#txtCanId').val($('#txtCanId').val().toLowerCase());
         }
     }
-
-    if ($('#txtName').val() == "") {
+    
+    if ($('#txtName').val() == "" ||  
+        !$('#txtName').val().match(/^[a-zA-Z\d ]{1,55}$/i)) {
         result = false;
         addInvalidClass($('#txtName'));
     }
@@ -290,7 +291,8 @@ function validateForm() {
         clearValidation($('#txtName'));
     }
 
-    if ($('#txtDescription').val() == "") {
+    if ($('#txtDescription').val() == "" ||
+        !$('#txtDescription').val().match(/^[a-zA-Z\d ]{1,250}$/i)) {
         result = false;
         addInvalidClass($('#txtDescription'));
     }
@@ -307,7 +309,8 @@ function validateForm() {
     }
 
     if ($('#spUnit').val() == "custom") {
-        if ($('#txtUnitName').val() == "") {
+        if ($('#txtUnitName').val() == "" ||
+            !$('#txtUnitName').val().match(/^[.]{1,25}$/i)) {
             result = false;
             addInvalidClass($('#txtUnitName'));
         }
@@ -315,7 +318,8 @@ function validateForm() {
             clearValidation($('#txtUnitName'));
         }
 
-        if ($('#txtUnitMetric').val() == "") {
+        if ($('#txtUnitMetric').val() == "" ||
+            !$('#txtUnitMetric').val().match(/^.{1,10}$/i)) {
             result = false;
             addInvalidClass($('#txtUnitMetric'));
         }

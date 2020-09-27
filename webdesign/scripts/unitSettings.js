@@ -29,7 +29,7 @@ function initUnitSettings() {
     $('#unitSettings').on('hidden.bs.modal', function () {
         clearValidation($('#txtName'));
         clearValidation($('#txtMetric'));
-      })
+    });
 }
 
 function handleButtonClick(){
@@ -101,23 +101,6 @@ function deleteUnit(){
     requestModification(data);
 }
 
-function requestModification(formData){
-    var request = $.ajax({
-        type: "POST",
-        url: "modifyUnit.php",
-        data: formData
-    });
-
-    request.done(function(msg){
-        location.reload();
-    });
-
-    request.fail(function(jqXHR, status){
-        console.log("Failed to update: " + status);
-        alert("Failed to update!");
-    })
-}
-
 function requestModification(formData) {
     $.ajax({
         type: "POST",
@@ -127,8 +110,13 @@ function requestModification(formData) {
         complete: async function (jqXHR, status) {
             if (jqXHR.status == 200) {
                 //console.log(jqXHR);
-                sessionStorage.setItem('responseMessage', jqXHR.responseText);
-                location.reload();
+                if (jqXHR.responseText.includes('a foreign key constraint fails')){
+                    showErrorMessage("Cannot delete Unit that is used for a Sensor, Remove all references to delete.");
+                }
+                else{
+                    sessionStorage.setItem('responseMessage', jqXHR.responseText);
+                    location.reload();
+                }
             }
             else {
                 if (status == "timeout") {
@@ -151,7 +139,8 @@ function requestModification(formData) {
 function validateForm() {
     var result = true;
 
-    if ($('#txtName').val() == "") {
+    if ($('#txtName').val() == "" ||
+        !$('#txtDescription').val().match(/^.{1,25}$/i)) {
         result = false;
         addInvalidClass($('#txtName'));
     }
@@ -159,7 +148,8 @@ function validateForm() {
         clearValidation($('#txtName'));
     }
 
-    if ($('#txtMetric').val() == "") {
+    if ($('#txtMetric').val() == "" ||
+        !$('#txtUnitMetric').val().match(/^.{1,10}$/i)) {
         result = false;
         addInvalidClass($('#txtMetric'));
     }
