@@ -34,7 +34,7 @@ body
         max-height: 80vh;
 }
 
-.alert{
+#sensorAlert,#successAlert{
         float: right;
         z-index: 20;
         margin-top: 1vh;
@@ -57,4 +57,16 @@ body
 
 #igLive{
         max-width: 30vh;
+}
+
+.mainSensors{
+        overflow: hidden;
+}
+
+.sensorTable{
+        margin-right: 3vh;
+}
+
+#control{
+        margin-bottom: 1vh;
 }
