@@ -21,7 +21,6 @@ body
 #chart {
         height: 60vh;
         max-height: 60vh;
-        
 }
 
 #focus {
@@ -34,7 +33,13 @@ body
         max-height: 80vh;
 }
 
-#sensorAlert,#successAlert{
+#loadingGraph{
+	height: 100vh;
+	display: none;
+	text-align: center;
+}
+
+.alert{
         float: right;
         z-index: 20;
         margin-top: 1vh;
