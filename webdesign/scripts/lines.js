@@ -307,11 +307,12 @@ function focusChart(data, svg, focus) {
 	var focusHeight = 100
 	var focusPadding = 20
 
-	var arc = d3.arc()
-		.innerRadius(0)
-		.outerRadius(focusHeight / 5 )
-		.startAngle(0)
-		.endAngle((d, i) => i ? Math.PI : -Math.PI)
+	arc = function(d) {
+		var e = +(d.type == "e"),
+			x = e ? 1 : -1,
+			y = focusHeight / 2;
+		return "M" + (.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y -6) + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) + "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
+	}
 
 	// var innerLine = d3.line()
 	// 	.length()
@@ -321,47 +322,17 @@ function focusChart(data, svg, focus) {
 		g.selectAll(".handle--custom")
 		.data([{type: "w"}, {type: "e"}])
 		.join(
-			enter =>
-				enter.append("g")
-					.attr("class", "handle-arc")
-						.append("path")
-						.attr("class", "handle--custom")
-						.attr("fill", "#474747")
-						.attr("fill-opacity", 0.8)
-						.attr("stroke-width", 0.5)
-						.attr("cursor", "ew-resize")
-						.attr("d", arc)
+			enter => enter.append("path")
+				.attr("class", "handle--custom")
+				.attr("fill", "#474747")
+				.attr("fill-opacity", 0.8)
+				.attr("stroke-width", 0.5)
+				.attr("stroke", "#D9D9D9")
+				.attr("cursor", "ew-resize")
+				.attr("d", arc)
 		)
 		.attr("display", selection === null ? "none" : null)
-		.attr("transform", selection === null ? null : (d, i) => `translate(${selection[i]},${((focusHeight + focusPadding/2)) / 2})`);
-
-		// g.selectAll(".handle-arc")
-		// .data([{type: "w"}, {type: "e"}])
-		// .join(
-		// 	enter =>
-		// 		enter//.selectAll(".handle-arc")
-		// 			.append("line")
-		// 			// .attr("x1", i)  //<<== change your code here
-		// 			// .attr("y1", focusHeight + focusPadding/3 * 2)
-		// 			// .attr("x2", i)  //<<== and here
-		// 			// .attr("y2", focusPadding/3)
-		// 			.style("stroke-width", 5)
-		// 			.style("stroke", "red")
-		// 			.style("fill", "none")
-		// 			.attr("display", selection === null ? "none" : null)
-		// 			.attr("x1", selection === null ? null : (d, i) => `${selection[i] - 3}`)
-		// 			.attr("y1", selection === null ? null : (d, i) => `${((focusHeight + focusPadding/2)) / 2 - 5}`)
-		// 			.attr("x2", selection === null ? null : (d, i) => `${selection[i] - 3}`)
-		// 			.attr("y2", selection === null ? null : (d, i) => `${((focusHeight + focusPadding/2)) / 2 + 10}`)
-
-		// 			//.attr("transform", selection === null ? null : (d, i) => `translate(${selection[i]},${((focusHeight + focusPadding/2)) / 2})`)
-		// )
-		// .attr("display", selection === null ? "none" : null)
-		// .attr("transform", selection === null ? null : (d, i) => `translate(${selection[i]},${((focusHeight + focusPadding/2)) / 2})`);
-	}
-
-
-
+		.attr("transform", selection === null ? null : (d, i) => `translate(${selection[i]},${0 - focusPadding})`);
 
 
 	//var margin = { top: 20, right: 20, bottom: 30, left: 40 }
