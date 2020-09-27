@@ -451,6 +451,26 @@ function focusChart(data, svg, focus) {
 
 }
 
+function movingAverage(values, N) {
+	let i = 0;
+	let sum = 0;
+	// make empty array for when missing values occur
+	const means = new Array(values.length).fill(NaN);
+
+	// https://observablehq.com/@d3/moving-average
+	for ( let n = Math.min(N - 1, values.length); i < n; ++i ) {
+	  sum += values[i];
+	}
+
+	for ( let n = values.length; i < n; ++i ) {
+	  sum += values[i];
+	  means[i] = sum / N;
+	  sum -= values[i - N + 1];
+	}
+
+	return means;
+}
+
 // run init on window load
 $(document).ready(function () {
 	initLines();
