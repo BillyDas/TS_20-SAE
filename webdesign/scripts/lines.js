@@ -44,7 +44,9 @@ function updateGraph() {
 
 	// format strings for use in GET request
 	for (var i = 0; i < yAxisIds.length; i++) {
-		yAxisIds[i] = '"' + yAxisIds[i] + '"';
+		if (!yAxisIds[i].includes('"')){
+			yAxisIds[i] = '"' + yAxisIds[i] + '"';
+		}
 	}
 
 	var url = "http://ts20.billydasdev.com:3000/data?canId=["
