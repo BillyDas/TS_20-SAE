@@ -332,7 +332,7 @@ function focusChart(data, svg, focus) {
 			.attr("display", selection === null ? "none" : null)
 			.attr("transform", selection === null ? null : (d, i) => `translate(${selection[i]},${0 - focusPadding})`);
 
-
+			}
 		//var margin = { top: 20, right: 20, bottom: 30, left: 40 }
 
 		var w = chartDiv.clientWidth;
@@ -420,31 +420,30 @@ function focusChart(data, svg, focus) {
 		} else {
 			gb.call(brush.move, [xScale(persistentSelection[0]), xScale(persistentSelection[1])])
 		}
+
+	function brushed() {
+		if (d3.event.selection) {
+			//focus.property("value", d3.event.selection.map(xScale.invert, xScale));
+			focus.dispatch("input");
+
+			[minX, maxX] = d3.event.selection.map(xScale.invert, xScale)
+			minY = d3.min(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
+			maxY = d3.max(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
+
+			lineChart(data, svg)
+
+			d3.select(this).call(brushHandle, d3.event.selection);
+		}
 	}
-}
 
-function brushed() {
-	if (d3.event.selection) {
-		//focus.property("value", d3.event.selection.map(xScale.invert, xScale));
-		focus.dispatch("input");
-
-		[minX, maxX] = d3.event.selection.map(xScale.invert, xScale)
-		minY = d3.min(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
-		maxY = d3.max(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
-
-		lineChart(data, svg)
-
-		d3.select(this).call(brushHandle, d3.event.selection);
-	}
-}
-
-function brushended() {
-	if (!d3.event.selection) {
-		gb.call(brush.move, defaultSelection);
-	}
-	else {
-		// can even move to brushed(), just probably better performance here?
-		persistentSelection = [xScale.invert(d3.event.selection[0]), xScale.invert(d3.event.selection[1])];
+	function brushended() {
+		if (!d3.event.selection) {
+			gb.call(brush.move, defaultSelection);
+		}
+		else {
+			// can even move to brushed(), just probably better performance here?
+			persistentSelection = [xScale.invert(d3.event.selection[0]), xScale.invert(d3.event.selection[1])];
+		}
 	}
 }
 
