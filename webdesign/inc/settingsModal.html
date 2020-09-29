@@ -106,6 +106,31 @@
                             </td>
                         </tr>
                     </tbody>
+                    <tbody id="settingsRollingAverage">
+                        <tr>
+                            <td>
+                                <label for="liveLoadFrom">Use Rolling Average: </label>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                    <label class="btn btn-primary active">
+                                        <input type="radio" name="options" id="rollingAverageOff" autocomplete="off" checked> Disabled
+                                    </label>
+                                    <label class="btn btn-secondary">
+                                        <input type="radio" name="options" id="rollingAverageOn" autocomplete="off"> Enabled
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="rollingAverage" style="display: none;">
+                            <td>
+                                <label for="txtRollingAverage">Days of Rolling average: </label>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="txtRollingAverage" placeholder="Days (Eg. 1)">
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
             <div class="modal-footer">
