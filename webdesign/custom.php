@@ -21,7 +21,9 @@
         
         <div id="graph">
 			<div id="loadingGraph" style="display:none;">
-				<img src="https://cdn.discordapp.com/attachments/691821735124795448/752082980218077184/loading.gif" />
+				Run Billy, run!
+				<br/>
+				<img src="https://cdn.discordapp.com/attachments/691821735124795448/761133806655635476/RUNBILLYRUN.gif" />
 				<br/>
 				Loading...
 			</div>
