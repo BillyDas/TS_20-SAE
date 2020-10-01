@@ -37,6 +37,7 @@ body
 #sensorAlert,#successAlert{
         float: right;
         z-index: 20;
+        position: sticky;
         margin-top: 1vh;
         max-width: 60vh;
         max-height: 40vh;
