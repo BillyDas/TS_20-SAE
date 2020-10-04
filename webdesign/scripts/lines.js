@@ -14,6 +14,10 @@ var minX, maxX, minY, maxY = null;
 
 var xAxisDataId = "";
 var yAxisDataId = "";
+var liveData = true;
+var debounce = true;
+var mostRecentDateTime;
+var lineData = [];
 
 
 function initLines() {
@@ -22,7 +26,12 @@ function initLines() {
 	var focus = d3.select(focusDiv).append("svg");
 
 	//update the graph initally when loaded
-	updateGraph();
+	if (liveData) {
+		setInterval(updateGraph, 3000);
+	}
+	else{
+		updateGraph();
+	}
 }
 
 function updateGraph() {
@@ -31,9 +40,24 @@ function updateGraph() {
 	{
 		return;
 	}
+	// this is kind of horrible but there's an issue where data will double up if i use firstUpdate, because the second update comes so close to the first
+	// because the calls from setinterval stack until the settings modal closes. The calls that fire almost at the same time end up in a race to the line
+	// "firstupdate = false;" and so the code interprets them all as the first update. If we can fix the stacked interval calls, everything will work
+	// by using "if(firstUpdate)" here and deleting this trash debounce variable.
+	if(debounce) { 
+		var loading = d3.select(loadingGraph);
+		loading.style("display", "block");
+		console.log("first update");
+		debounce = false;
+	}
+	else {
+		console.log("subsequent update");
+		startDateTime = mostRecentDateTime;
+		endDateTime = moment();
 
-	var loading = d3.select(loadingGraph);
-	loading.style("display", "block");
+		console.log("starting " + startDateTime);
+		console.log("ending " + endDateTime);
+	}
 
 	//select svg area
 	var svg = d3.select(chartDiv).select("svg");
@@ -58,12 +82,25 @@ function updateGraph() {
 	// load the dataset and then draw
 	fetch(url)
 		.then(response => response.json())
-		.then(lineData => {
+		.then(newData => {
 			// data conversion for time and data
-			lineData.forEach(function (d) {
+			newData.forEach(function (d) {
 				d.UTCTimestamp = Date.parse(d.UTCTimestamp);
 				d.Data = parseFloat(d.Data);
 			})
+
+			console.log(newData);
+			console.log(lineData);
+
+
+			lineData = lineData.concat(newData);
+
+			if (liveData) {
+				//stores most recent date from linedata for live updating
+				mostRecentDateTime = moment(new Date(Math.max.apply(null, lineData.map(function(e) {
+					return new Date(e.UTCTimestamp);
+				}))));
+			}
 
 			url = "http://ts20.billydasdev.com:3000/desc?canId=[" + yAxisIds.toString() + "]"
 			fetch(url)
@@ -76,10 +113,12 @@ function updateGraph() {
 						sensorDescCache.push(d);
 
 						sensorNameCache[d.CanId] = d.Name + ' (' + d.UnitMetric + ')';
-					})
+					});
+
 
 					// hide loading graphic
-					loading.style("display", "none");
+					if (firstUpdate) //only neccesary if there was a loading graphic to begin with, on subsequent updates to the first, there is not.
+						loading.style("display", "none");
 
 					// draw line chart
 					lineChart(lineData, svg);
@@ -448,6 +487,7 @@ function focusChart(data, svg, focus) {
 		}
 	}
 }
+
 
 // run init on window load
 $(document).ready(function () {
