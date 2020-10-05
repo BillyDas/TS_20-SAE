@@ -5,6 +5,7 @@ var defLiveDataNum = 6;
 var defEndDateTime = moment("2020-08-23T16:55:05.970327");
 var defStartDateTime = moment("2020-08-23T16:50:05.970327");
 var timeRangeLiveMode = false;
+var rollingAverage = false;
 
 if (typeof (startDateTime) == 'undefined') {
     var startDateTime = defStartDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS');
@@ -81,6 +82,25 @@ function initSettings() {
         $('#settingsTimingLive').val("on");
         timeRangeLiveMode = true;
     });
+
+    $('#rollingAverageOff').parent().click(function () {
+        $('#rollingAverageOff').parent().removeClass("btn btn-secondary");
+        $('#rollingAverageOn').parent().removeClass("btn btn-primary active");
+        $('#rollingAverageOn').parent().addClass("btn btn-secondary");
+        $('#rollingAverageOff').parent().addClass("btn btn-primary active");
+        $('.rollingAverage').hide();
+        rollingAverage = false;
+    });
+
+    $('#rollingAverageOn').parent().click(function () {
+        $('#rollingAverageOn').parent().removeClass("btn btn-secondary");
+        $('#rollingAverageOff').parent().removeClass("btn btn-primary active");
+        $('#rollingAverageOff').parent().addClass("btn btn-secondary");
+        $('#rollingAverageOn').parent().addClass("btn btn-primary active");
+        $('.rollingAverage').show();
+        rollingAverage = true;
+    });
+
 
     $('#settingsModal').on('hidden.bs.modal', function (e) {
         controlUpdate();
