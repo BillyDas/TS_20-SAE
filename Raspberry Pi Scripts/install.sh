@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #This script will install dependencies and install the required scripts for the TS20 Data Visualisation
 #Version 1.0
 
@@ -19,11 +18,9 @@ while true; do
     case $yn in
         [Yy]* ) break;;
         [Nn]* ) exit;;
-        * ) echo -e "${RED}Please answer yes [y] or no [N].${NOCOLOR}" >&2;;
+        * ) echo -e "${RED}Please answer yes [y] or no [N].${NOCOLOR}";;
     esac
 done
-
-echo -e "Starting Installation."
 
 #ensure user is superuser, if not exit
 if [ $(id -u) != "0" ]; then
@@ -32,14 +29,14 @@ if [ $(id -u) != "0" ]; then
 fi
 
 #ensure raspberry pi is up to date
-echo -e "${GREEN}Python 3 Installed${NOCOLOR}" >&1
 apt-get update -y > /dev/null
 
 #check that python3 is installed
+
 if [[ ! -z $(which python3 | grep "/python3") ]]; then
-    echo -e "${GREEN}[DPND] Python 3 Installed${NOCOLOR}" >&1
+    echo -e "${GREEN}Python 3 Installed${NOCOLOR}" >&1
 else
-    echo -e "${RED}[DPND]Python 3 Not installed, Please Install.${NOCOLOR}" >&2
+    echo -e "${RED}Python 3 Not installed, Please Install.${NOCOLOR}" >&2
     exit 1
 fi
 
