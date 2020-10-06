@@ -8,7 +8,9 @@ services:
         ports:
             - "3000:3000"
     web:
-        build: ./web
+        build: 
+            context: ./web
+            target: prod #prod or dev - see docs for info
         container_name: ts20web
         links:
             - "db:database"
