@@ -6,6 +6,7 @@ var defEndDateTime = moment("2020-08-23T16:55:05.970327");
 var defStartDateTime = moment("2020-08-23T16:50:05.970327");
 var timeRangeLiveMode = false;
 var rollingAverage = false;
+var backlogDataRange = 0;
 
 if (typeof (startDateTime) == 'undefined') {
     var startDateTime = defStartDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS');
@@ -44,7 +45,7 @@ function initSettings() {
 
     //Setup Event Listeners
     $('#xAxisSelectPicker').on('changed.bs.select', function () {
-       xAxisDataId = $('#xAxisSelectPicker').val();
+        xAxisDataId = $('#xAxisSelectPicker').val();
     });
 
     $('#yAxisSelectPicker').on('changed.bs.select', function () {
@@ -101,6 +102,13 @@ function initSettings() {
         rollingAverage = true;
     });
 
+    $('#liveNum').change(function () {
+        updateBacklogData();
+    });
+
+    $('#liveRange').change(function () {
+        updateBacklogData();
+    });
 
     $('#settingsModal').on('hidden.bs.modal', function (e) {
         controlUpdate();
@@ -120,6 +128,13 @@ function controlUpdate() {
         $('#focus svg').empty();
     }
 }
+
+function updateBacklogData() {
+    var backlogVal = $('#liveNum').val();
+    var backlogRange = $('#liveRange').val();
+    backlogDataRange = backlogVal * backlogRange;
+}
+
 
 // run init on window load
 $(document).ready(function () {
