@@ -20,9 +20,7 @@ cloud_server = "http://ts20.billydasdev.com:3000/sync"
 ###################################################
 # STATIC VARIABLES
 ###################################################
-SELECT_QUERY = "SELECT * FROM SensorData ORDER BY UTCTimestamp DESC LIMIT 1"
 SELECT_BULK_QUERY = "SELECT * FROM SensorData ORDER BY UTCTimestamp DESC LIMIT 500"
-DELETE_QUERY = "DELETE FROM SensorData WHERE SensorDataId = '{}'"
 DELETE_BULK_QUERY = "DELETE FROM SensorData WHERE SensorDataId IN {}"
 CancelRequested = False
 cursor = None
@@ -34,7 +32,7 @@ logging.basicConfig(format='%(levelname)s:%(message)s', level=logLevel)
 ###################################################
 # BACKGROUND FUNCTIONS
 ###################################################
-
+# Connect to the local database
 def connectDB():
     try:
         global cursor, dbcon
@@ -46,19 +44,7 @@ def connectDB():
         logging.error("Error Connecting To Database: \n" + str(err))
         return False
 
-
-def getDBRow():
-    try:
-        global cursor
-        cursor.execute(SELECT_QUERY)
-        for (SensorDataId, CanId, Data, UTCTimestamp) in cursor:
-            logging.debug("{}   {}  {}  {}".format(
-                SensorDataId, CanId, Data, UTCTimestamp))
-            return SensorDataId, CanId, Data, UTCTimestamp
-    except Exception as ex:
-        logging.error("Error Occured getting Row from DB: \n" + str(ex))
-        return None, None, None, None
-
+# Pulls data from the database to be synced as an array of Row Dictionary.
 def getDBArray():
     try:
         global cursor
@@ -77,6 +63,7 @@ def getDBArray():
     except Exception as ex:
         logging.error("Error Occurred getting DB Array: \n" + str(ex))
 
+# Builds data into request data from a db data array.
 def buildReqMultiData(dataArr):
     try:
         data = json.dumps(str(dataArr))
@@ -91,23 +78,6 @@ def buildReqMultiData(dataArr):
         return reqdata
     except:
         logging.error("Error Occurred Bulding Bulk Request Data")
-        return None
-
-def buildReqData(CanId, Data, UTCTimestamp):
-    try:
-        md5 = hashlib.md5()
-        md5.update((str(UTCTimestamp) + str(CanId) +
-                    str(Data)).encode('utf-8'))
-        hash = md5.hexdigest()
-        reqdata = {
-            'datetime': UTCTimestamp,
-            'canid': CanId,
-            'data': Data,
-            'hash': hash
-        }
-        return reqdata
-    except:
-        logging.error("Error Occurred Bulding Request Data")
         return None
 
 # Uploads Data to API and Returns True if completed successfully.
@@ -125,16 +95,7 @@ def uploadData(reqData):
         logging.error("Error connecting to API server \n" + str(ce))
         return False
 
-def removeRow(SensorDataId):
-    try:
-        global cursor, dbcon
-        cursor.execute(DELETE_QUERY.format(SensorDataId))
-        dbcon.commit()
-        return True
-    except Exception as ex:
-        logging.error("Error Occured Removing Row: \n" + str(ex))
-        return False
-
+# Removes rows from the database that have been Synced
 def removeRows(delArr):
     try:
         global cursor, dbcon
@@ -165,22 +126,6 @@ while not CancelRequested:
                 uploaded = uploadData(reqData)
                 if uploaded:
                     logging.info("Uploaded to Cloud DB Successfully")
-                    removed = removeRows(delArr)
-            logging.debug(reqData)            
+                    removed = removeRows(delArr)            
         else:
             time.sleep(30)
-
-
-
-
-        '''SensorDataId, CanId, Data, UTCTimestamp = getDBRow()
-        if (SensorDataId != None):
-            reqData = buildReqData(CanId, Data, UTCTimestamp)
-            if (reqData != None):
-                uploaded = uploadData(reqData)
-                if uploaded:
-                    logging.info("Uploaded to Cloud DB Successfully")
-                    removed = removeRow(SensorDataId)
-            time.sleep(30)
-        else:
-            time.sleep(30)'''

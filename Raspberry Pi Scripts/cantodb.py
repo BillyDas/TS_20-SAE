@@ -10,7 +10,7 @@ import logging
 import datetime
 
 #Settings
-logLevel = logging.INFO
+logLevel = logging.DEBUG
 
 # Global Variables
 INSERT_QUERY = "INSERT INTO SensorData (CanId, Data, UTCTimestamp) Values ('{}','{}','{}')"
@@ -49,13 +49,15 @@ def addDB(canId, timestamp, data):
 # Main
 while(True):
     if (dbCon == None):
-        connectDB()
-        logging.info("Connected to DB")
+        #connectDB()
+        #logging.info("Connected to DB")
+        dbCon = True
     else:
         message = bus.recv()
         if message != None:
             logging.debug("Message Recieved on CAN bus")
-            unpacked = struct.unpack_from("<f", message.data, 0)
+            binary = ''.join(format(byte, '08b') for byte in message.data)
+            logging.debug(bin)            
             timestamp = message.timestamp
             canId = message.arbitration_id
             data = tuple(unpacked)[0]
