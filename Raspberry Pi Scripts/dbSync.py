@@ -15,7 +15,7 @@ import json
 # SETTINGS
 ###################################################
 logLevel = logging.INFO
-#cloud_server = "http://10.0.0.171:3000/sync"
+#cloud_server = "http://10.0.0.66:3000/sync"
 cloud_server = "http://ts20.billydasdev.com:3000/sync"
 ###################################################
 # STATIC VARIABLES
@@ -25,6 +25,7 @@ DELETE_BULK_QUERY = "DELETE FROM SensorData WHERE SensorDataId IN {}"
 CancelRequested = False
 cursor = None
 dbcon = None
+retries = 0
 
 # Setup Logging
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logLevel)
@@ -113,19 +114,24 @@ def removeRows(delArr):
 ###################################################
 # MAIN FUNCTION
 ###################################################
-
-while not CancelRequested:
+logging.info("DBSync Started")
+while not CancelRequested:    
     if (cursor == None):
         connected = connectDB()
-    if (cursor != None):
-        dataArr, delArr = getDBArray()
+    if (cursor != None):        
+        dataArr, delArr = getDBArray()        
         if (len(dataArr) > 0):
+            retries = 0
             reqData = buildReqMultiData(dataArr)
             logging.debug(reqData)
             if (reqData != None):
                 uploaded = uploadData(reqData)
                 if uploaded:
-                    logging.info("Uploaded to Cloud DB Successfully")
+                    logging.debug("Uploaded to Cloud DB Successfully")
                     removed = removeRows(delArr)            
-        else:
-            time.sleep(30)
+        else:             
+            if (retries < 40):
+                retries += 1
+            logging.debug("No data - Sleeping for " + str(retries * 2)  + " seconds")         
+            time.sleep(retries * 2)
+            cursor = None

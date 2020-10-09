@@ -17,8 +17,10 @@ def can_send(can_id, data):
 
 def main():
     errors = False
-    while(errors == False):
-        msg = struct.pack("BBBBBBBB", 1,2,3,4,5,6,7,8)
+    if(errors == False):
+        #msg = struct.pack("BBBBBBBB", 1,2,3,4,5,6,7,8)
+        msg = struct.pack("<f", 2.0)
+        print(msg)
         errors = can_send(0x3CB, msg)
         time.sleep(1)
 

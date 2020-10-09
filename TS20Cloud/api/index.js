@@ -43,64 +43,6 @@ app.get('/', function (req, res) {
 /***********************************************************************************************
  *  DBSync POST Request Route
  ***********************************************************************************************/
-app.post('/sync/single', function (req, res) {
-  var errors = false;
-  //get POST params to variables
-  var canid = req.body.canid;
-  var data = req.body.data;
-  var datetime = req.body.datetime;
-  var hash = req.body.hash;
-  var locHash = crypto.createHash('md5').update(datetime + canid + data).digest("hex");
-  //Check Parameters are valid
-  if (canid != null && data != null && datetime != null && hash == locHash) {
-    try {
-      //setup MySQL Connection
-      var connection = mysql.createConnection(dbVars);
-      //Open MySQL Connection to push data to DB
-      connection.connect();
-      //Set up the query string to add data to the database
-      var query = `INSERT INTO SensorData(CanId, Data, UTCTimestamp) VALUES('${canid}','${data}','${datetime}')`;
-      //Add Record to DB in SensorData Table
-      connection.query(query, function (err) {
-        //if an error occurs catch it and log to the console.
-        if (err) {
-          console.log(err);
-          errors = true;
-        }
-      });
-      //Close MySQL Connection
-      connection.end();
-      //catch any errors from adding the data to the database and opening the connection to the db
-    } catch (ex) {
-      console.log(ex);
-      errors = true;
-    }
-    //if there were no errors respond with a 200 OK status
-    if (!errors) {
-      res.status(200).send("Added to DB successfully");
-    } else {
-      //otherwise there were errors so return a 500 internal server error with the error message.
-      res.status(500).send('Error Occurred adding data to DB: \n' + ex);
-    }
-  }
-  //incorrect parameters passed in POST request
-  else {
-    //Set the response status to 400 Bad Request
-    res.status(400);
-    //if the post request was bad due to incorrect parameters passed tell the user.
-    if (canid == null || data == null || datetime == null || hash == null) {
-      res.send('Bad Request: No data or incorrect data sent');
-    }
-    //if the hash did not match then tell the user that there is bad data in the request.
-    else if (locHash != hash) {
-      res.send('Bad Request: Hash did not match, data may be corrupted!');
-    }
-  }
-});
-
-/***********************************************************************************************
- *  DBSync POST Request Route
- ***********************************************************************************************/
 app.post('/sync', function (req, res) {
   var errors = false;
   //get POST params to variables
@@ -112,6 +54,8 @@ app.post('/sync', function (req, res) {
   //Check Parameters are valid
   if (hash == locHash) {
     try {
+      //fix data before adding to DB -> THIS IS WHERE THE IMPLEMENTATION OF TEMPLATES SHOULD TAKE PLACE
+      dataArr.forEach(item => item.Data = Buffer.from(item.Data, 'hex').readFloatLE(0));
       //setup MySQL Connection
       var connection = mysql.createConnection(dbVars);
       //Open MySQL Connection to push data to DB
@@ -227,9 +171,11 @@ app.get('/data', function (req, res) {
         console.log(err);
         errors = true;
       }
-      res.type('json');
-      res.status(200);
-      res.json(result);
+      else{
+        res.type('json');
+        res.status(200);
+        res.json(result);
+      }
     });
     //Close MySQL Connection
     connection.end();
