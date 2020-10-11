@@ -1,3 +1,5 @@
+var loading;
+
 var persistentSelection = null;
 var sensorNameCache = {}; // might be redundant now that i'm storing it all
 var sensorDescCache = [];
@@ -40,7 +42,7 @@ function updateGraph() {
 	}
 
 	// loadingImgRand = Math.floor(Math.random() * 2);
-	//loading = d3.select(loadingGraph);
+	loading = d3.select(loadingGraph);
 	// TODO: make these NOT discord links...
 	//if (loadingImgRand == 0) {
 	//	document.getElementById("loadingImg").src = "https://cdn.discordapp.com/attachments/691821735124795448/752082980218077184/loading.gif";
