@@ -1,6 +1,7 @@
 var persistentSelection = null;
 var sensorNameCache = {}; // might be redundant now that i'm storing it all
 var sensorDescCache = [];
+var xAxisCache = {};
 
 var chartDiv = document.getElementById("chart");
 var focusDiv = document.getElementById("focus");
@@ -27,6 +28,7 @@ function initLines() {
 
 function updateGraph() {
 	// TODO: these are subject to change, but are temporary and needed for loading img
+
 	if (yAxisDataId === "" || startDateTime === "" || endDateTime === "") // xAxis needs to be added when configured
 	{
 		return;
@@ -111,21 +113,32 @@ function updateGraph() {
 									d.Data = parseFloat(d.Data)
 								})
 
-								// hide loading graphic
-								loading.style("display", "none");
-								
-								// draw line chart
-								lineChart(lineData, svg, xAxisData);
-								focusChart(lineData, svg, focus, xAxisData);
-								
-								if (firstUpdate) {
-									// add listener to draw on resize
-									window.addEventListener("resize", function () {
+								url = "http://ts20.billydasdev.com:3000/desc?canId=[" + xAxisIds.toString() + "]";
+								fetch(url)
+									.then(response => response.json())
+									.then(xAxisDesc => {
+										xAxisCache = {};
+
+										xAxisDesc.forEach(function (d) {
+											xAxisCache[d.CanId] = d.Name + ' (' + d.UnitMetric + ')';
+										})
+
+										// hide loading graphic
+										loading.style("display", "none");
+										
+										// draw line chart
 										lineChart(lineData, svg, xAxisData);
 										focusChart(lineData, svg, focus, xAxisData);
-									});
-									firstUpdate = false;
-								}
+										
+										if (firstUpdate) {
+											// add listener to draw on resize
+											window.addEventListener("resize", function () {
+												lineChart(lineData, svg, xAxisData);
+												focusChart(lineData, svg, focus, xAxisData);
+											});
+											firstUpdate = false;
+										}
+									})
 							});
 
 					} else {
@@ -182,12 +195,25 @@ function lineChart(data, svg, xAxisData = null) {
 	if (xAxisData != null) {
 		// TODO: this is a terrible TERRIBLE TERRIBLE way of doing it, PLEASE fix
 		data.forEach(function(d) {
-			d.UTCTimestamp = Math.round(d.UTCTimestamp / 100) * 100;
+			d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
 		})
 
 		xAxisData.forEach(function(d) {
-			d.UTCTimestamp = Math.round(d.UTCTimestamp / 100) * 100;
+			d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
 		})
+
+		let extraData = [];
+		// data.forEach(function(a) {
+		// 	let result = xAxisData.filter(function(b) {
+		// 		return b.UTCTimestamp == a.UTCTimestamp;
+		// 	});
+
+		// 	if (result.length == 0) {
+				
+		// 	}
+		// })
+
+		let droppedData = 0;
 
 		// god has abandoned us
 		data = data.filter(function(a) {
@@ -197,12 +223,30 @@ function lineChart(data, svg, xAxisData = null) {
 
 
 			if (result.length == 0) {
+				droppedData++;
 				return false;
 			} else {
 				a.xAxisVal = result[0].Data;
+
+				let dupe;
+
+				dupe = Object.assign({}, a);
+				// console.log(a);
+				// console.log(dupe);
+
+				for (let i = 1; i < result.length; i++) {
+					dupe.xAxisVal = result[1].Data;
+					extraData.push(dupe);
+				}
+				
 				return true;
 			}
 		});
+
+		//?
+		data.push(...extraData);
+
+		//alert("Dropped " + droppedData + " points of data.");
 	}
 
 	
@@ -220,18 +264,24 @@ function lineChart(data, svg, xAxisData = null) {
 
 	var xScale = null;
 	if (xAxisData != null) {
-		xScale = d3.scaleLinear()
+		if (minX != null && maxX != null) {
+			xScale = d3.scaleLinear()
+				.domain([minX, maxX])
+				.range([dynamicPaddingLeft, (w - w * 0.1) - padding]) // temp fix for names not fitting
+			//.nice();
+		} else {
+			xScale = d3.scaleLinear()
 			.domain(d3.extent(xAxisData, function (d) { return d.Data; }))
 			.range([dynamicPaddingLeft, (w - w * 0.1) - padding]);
 			//.nice();
+		}
 	} else {
 		if (minX != null && maxX != null) {
 			xScale = d3.scaleTime()
 				.domain([minX, maxX])
 				.range([dynamicPaddingLeft, (w - w * 0.1) - padding]) // temp fix for names not fitting
 			//.nice();
-		}
-		else {
+		} else {
 			// set x axis to scale based on times
 			xScale = d3.scaleTime()
 				.domain(d3.extent(data, function (d) { return d.UTCTimestamp; }))
@@ -259,7 +309,8 @@ function lineChart(data, svg, xAxisData = null) {
 		.style("font-size", "1em")
 		// TODO: no! no! no!
 		// need another api request to get the data for x axis sensor,,, this is temporary hack 
-		.text((xAxisData != null) ? document.getElementById("xAxisSelectPicker").options[document.getElementById("xAxisSelectPicker").selectedIndex].text : "Time");
+		///.text((xAxisData != null) ? document.getElementById("xAxisSelectPicker").options[document.getElementById("xAxisSelectPicker").selectedIndex].text : "Time");
+		.text((xAxisData != null) ? xAxisCache[Object.keys(xAxisCache)[0]] : "Time");
 
 
 	var yScale = null;
@@ -353,6 +404,23 @@ function lineChart(data, svg, xAxisData = null) {
 	// if x axis isnt time:
 	if (xAxisData != null) {
 		// every line is pain
+
+		// const g = svg.append("g")
+		// 	.attr("fill", "none")
+		// 	.attr("stroke-linecap", "round");
+
+		// sumstat.forEach(function(d) {
+		// 	g.selectAll(".path")
+		// 	.data(d.values)
+		// 	.join("path")
+		// 		.attr("d", function (d) { return `M${xScale(d.xAxisVal)},${yScale(d.Data)}h0` } )
+		// 		.attr("stroke", function (d) { return color(d.CanId) })
+		// 	.attr("clip-path", "url(#chartClip)");
+		// })
+		
+
+
+
 		sumstat.forEach(function(d) {
 			svg.selectAll(".dot")
 				.data(d.values)
@@ -360,9 +428,12 @@ function lineChart(data, svg, xAxisData = null) {
 				.append("circle")
 					.attr("cx", function(d) { return xScale(d.xAxisVal) } )
 					.attr("cy", function (d) { return yScale(d.Data) } )
-					.attr("r", 1.5)
-					.style("fill", function (d) { return color(d.CanId)})
+					.attr("r", 2)
+					.attr("opacity", 0.3)
+					.style("fill", function (d) { return color(d.CanId)
+				}).attr("clip-path", "url(#chartClip)");
 		})
+
 	
 
 	} else {
@@ -380,8 +451,7 @@ function lineChart(data, svg, xAxisData = null) {
 					.x(function (d) { return xScale(d.UTCTimestamp); })
 					.y(function (d) { return yScale(d.Data); })
 					(d.values)
-			})
-			.attr("clip-path", "url(#chartClip)");
+			}).attr("clip-path", "url(#chartClip)");
 	}
 
 	// add dots for the legend
@@ -453,6 +523,63 @@ function focusChart(data, svg, focus, xAxisData = null) {
 
 		var w = chartDiv.clientWidth;
 
+		if (xAxisData != null) {
+			// TODO: this is a terrible TERRIBLE TERRIBLE way of doing it, PLEASE fix
+			data.forEach(function(d) {
+				d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
+			})
+	
+			xAxisData.forEach(function(d) {
+				d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
+			})
+	
+			let extraData = [];
+			// data.forEach(function(a) {
+			// 	let result = xAxisData.filter(function(b) {
+			// 		return b.UTCTimestamp == a.UTCTimestamp;
+			// 	});
+	
+			// 	if (result.length == 0) {
+					
+			// 	}
+			// })
+	
+			let droppedData = 0;
+	
+			// god has abandoned us
+			data = data.filter(function(a) {
+				let result = xAxisData.filter(function(b) {
+					return b.UTCTimestamp == a.UTCTimestamp;
+				});
+	
+	
+				if (result.length == 0) {
+					droppedData++;
+					return false;
+				} else {
+					a.xAxisVal = result[0].Data;
+	
+					let dupe;
+	
+					dupe = Object.assign({}, a);
+					// console.log(a);
+					// console.log(dupe);
+	
+					for (let i = 1; i < result.length; i++) {
+						dupe.xAxisVal = result[1].Data;
+						extraData.push(dupe);
+					}
+					
+					return true;
+				}
+			});
+	
+			//?
+			data.push(...extraData);
+	
+			//alert("Dropped " + droppedData + " points of data.");
+		}
+
 		// group data based on CanId
 		var sumstat = d3.nest()
 			.key(function (d) { return d.CanId; })
@@ -470,10 +597,63 @@ function focusChart(data, svg, focus, xAxisData = null) {
 			.y0(y(0))
 			.y1(d => y(d.value))
 
-		// set x axis to scale based on times
-		var xScale = d3.scaleTime()
-			.domain(d3.extent(data, function (d) { return d.UTCTimestamp; }))
-			.range([padding, w - padding])
+
+
+		var xScale = null;
+		if (xAxisData != null) {
+			xScale = d3.scaleLinear()
+				.domain(d3.extent(xAxisData, function (d) { return d.Data; }))
+				.range([padding, w - padding])
+				//.nice();
+		} else {
+			if (minX != null && maxX != null) {
+				xScale = d3.scaleTime()
+					.domain([minX, maxX])
+					.range([padding, w - padding])
+				//.nice();
+			}
+			else {
+				// set x axis to scale based on times
+				xScale = d3.scaleTime()
+					.domain(d3.extent(data, function (d) { return d.UTCTimestamp; }))
+					.range([padding, w - padding])
+				//.nice();
+			}	
+		}
+
+		// var xScale = null;
+		// if (xAxisData != null) {
+		// 	if (minX != null && maxX != null) {
+		// 		xScale = d3.scaleLinear()
+		// 			.domain([minX, maxX])
+		// 			.range([dynamicPaddingLeft, (w - w * 0.1) - padding]) // temp fix for names not fitting
+		// 		//.nice();
+		// 	} else {
+		// 		xScale = d3.scaleLinear()
+		// 		.domain(d3.extent(xAxisData, function (d) { return d.Data; }))
+		// 		.range([dynamicPaddingLeft, (w - w * 0.1) - padding]);
+		// 		//.nice();
+		// 	}
+		// } else {
+		// 	if (minX != null && maxX != null) {
+		// 		xScale = d3.scaleTime()
+		// 			.domain([minX, maxX])
+		// 			.range([dynamicPaddingLeft, (w - w * 0.1) - padding]) // temp fix for names not fitting
+		// 		//.nice();
+		// 	} else {
+		// 		// set x axis to scale based on times
+		// 		xScale = d3.scaleTime()
+		// 			.domain(d3.extent(data, function (d) { return d.UTCTimestamp; }))
+		// 			.range([dynamicPaddingLeft, w - padding])
+		// 		//.nice();
+		// 	}	
+		// }
+
+		
+		// // set x axis to scale based on times
+		// var xScale = d3.scaleTime()
+		// 	.domain(d3.extent(data, function (d) { return d.UTCTimestamp; }))
+		// 	.range([padding, w - padding])
 		//.nice();
 
 		// create x axis labels
@@ -513,20 +693,70 @@ function focusChart(data, svg, focus, xAxisData = null) {
 			.attr("transform", "translate(0, " + (focusHeight + 1) + ")")
 			.call(xAxis, xScale, focusHeight);
 
-		focus.selectAll(".line")
-			.data(sumstat)
-			.enter()
-			.append("path")
-			.attr("class", "line")
-			.attr("fill", "none")
-			.attr("stroke", function (d) { return color(d.key); })
-			.attr("stroke-width", 1.5)
-			.attr("d", function (d) {
-				return d3.line()
-					.x(function (d) { return xScale(d.UTCTimestamp); })
-					.y(function (d) { return focusYScale(d.Data); })
-					(d.values)
-			});
+
+		// if x axis isnt time:
+		if (xAxisData != null) {
+			// every line is pain
+			sumstat.forEach(function(d) {
+				focus.selectAll(".dot")
+					.data(d.values)
+					.enter()
+					.append("circle")
+						.attr("cx", function(d) { return xScale(d.xAxisVal) } )
+						.attr("cy", function (d) { return focusYScale(d.Data) } )
+						.attr("r", 2)
+						.attr("opacity", 0.3)
+						.style("fill", function (d) { return color(d.CanId)})
+			})
+			// const g2 = focus.append("g")
+			// .attr("fill", "none")
+			// .attr("stroke-linecap", "round");
+
+			// sumstat.forEach(function(d) {
+			// 	g2.selectAll(".path")
+			// 	.data(d.values)
+			// 	.join("path")
+			// 		.attr("d", function (d) { return `M${xScale(d.xAxisVal)},${focusYScale(d.Data)}h0` } )
+			// 		.attr("stroke", function (d) { return color(d.CanId) });
+			// })
+		
+
+		} else {
+			// add sensors as lines to the svg
+			focus.selectAll(".line")
+				.data(sumstat)
+				.enter()
+				.append("path")
+				.attr("class", "line")
+				.attr("fill", "none")
+				.attr("stroke", function (d) { return color(d.key); })
+				.attr("stroke-width", 1.5)
+				.attr("d", function (d) {
+					return d3.line()
+						.x(function (d) { return xScale(d.UTCTimestamp); })
+						.y(function (d) { return focusYScale(d.Data); })
+						(d.values)
+				})
+				//.attr("clip-path", "url(#chartClip)");
+		}
+
+
+
+
+		// focus.selectAll(".line")
+		// 	.data(sumstat)
+		// 	.enter()
+		// 	.append("path")
+		// 	.attr("class", "line")
+		// 	.attr("fill", "none")
+		// 	.attr("stroke", function (d) { return color(d.key); })
+		// 	.attr("stroke-width", 1.5)
+		// 	.attr("d", function (d) {
+		// 		return d3.line()
+		// 			.x(function (d) { return xScale(d.UTCTimestamp); })
+		// 			.y(function (d) { return focusYScale(d.Data); })
+		// 			(d.values)
+		// 	});
 
 		const gb = focus.append("g")
 			.call(brush)
@@ -539,6 +769,7 @@ function focusChart(data, svg, focus, xAxisData = null) {
 
 	function brushed() {
 		if (d3.event.selection) {
+
 			//focus.property("value", d3.event.selection.map(xScale.invert, xScale));
 			focus.dispatch("input");
 
@@ -546,7 +777,11 @@ function focusChart(data, svg, focus, xAxisData = null) {
 			minY = d3.min(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
 			maxY = d3.max(data, d => minX <= d.UTCTimestamp && d.UTCTimestamp <= maxX ? d.value : NaN);
 
-			lineChart(data, svg, xAxisData)
+			// TODO always chart linechart here, temp for scatterplot performance issues
+			if (xAxisData == null) {
+				lineChart(data, svg, xAxisData)
+			}
+			
 
 			d3.select(this).call(brushHandle, d3.event.selection);
 		}
@@ -559,6 +794,12 @@ function focusChart(data, svg, focus, xAxisData = null) {
 		else {
 			// can even move to brushed(), just probably better performance here?
 			persistentSelection = [xScale.invert(d3.event.selection[0]), xScale.invert(d3.event.selection[1])];
+			
+			// TODO, remove this
+			if (xAxisData != null)
+			{
+				lineChart(data, svg, xAxisData)
+			}
 		}
 	}
 }
