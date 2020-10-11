@@ -7,6 +7,7 @@ var focusDiv = document.getElementById("focus");
 var padding = 100;
 var firstUpdate = true;
 
+//for selection of data from the database
 var startDateTime = moment("2020-08-23T16:50:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');;
 var endDateTime = moment("2020-08-23T16:55:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');;
 
@@ -14,9 +15,10 @@ var minX, maxX, minY, maxY = null;
 
 var xAxisDataId = "";
 var yAxisDataId = "";
-var liveData = true;
-var debounce = true;
+
+//global for most recent date in lineData
 var mostRecentDateTime;
+//global for graph data
 var lineData = [];
 
 
@@ -26,13 +28,13 @@ function initLines() {
 	var focus = d3.select(focusDiv).append("svg");
 
 	//update the graph initally when loaded
-	if (liveData) {
-		setInterval(updateGraph, 3000);
-	}
-	else{
-		updateGraph();
-	}
+	updateGraph();
 }
+
+//Called from initLines AND settingsModal.js/controlUpdate.
+//controlUpdate defines a setInterval when timeRangeLiveMode is true.
+//timeRangeLiveMode is controlled in settingsModal.js with the settings button/live mode on the page.
+//firstUpdate is controlled on this file, and is mainly covering live updates. note that too many quick calls to updategraph can cause data to double up. this is due to a race condition to the "firstUpdate = false" line.
 
 function updateGraph() {
 	// TODO: these are subject to change, but are temporary and needed for loading img
@@ -40,19 +42,17 @@ function updateGraph() {
 	{
 		return;
 	}
-	// this is kind of horrible but there's an issue where data will double up if i use firstUpdate, because the second update comes so close to the first
-	// because the calls from setinterval stack until the settings modal closes. The calls that fire almost at the same time end up in a race to the line
-	// "firstupdate = false;" and so the code interprets them all as the first update. If we can fix the stacked interval calls, everything will work
-	// by using "if(firstUpdate)" here and deleting this trash debounce variable.
-	if(debounce) { 
+
+	if(firstUpdate) { 
 		var loading = d3.select(loadingGraph);
 		loading.style("display", "block");
 		console.log("first update");
-		debounce = false;
 	}
-	else {
+	else { //on subsequent update (live data only).
 		console.log("subsequent update");
+		//mostRecentDateTime is the most recent date from the existing contents of lineData.
 		startDateTime = mostRecentDateTime;
+		//moment() is right now
 		endDateTime = moment();
 
 		console.log("starting " + startDateTime);
@@ -89,13 +89,10 @@ function updateGraph() {
 				d.Data = parseFloat(d.Data);
 			})
 
-			console.log(newData);
-			console.log(lineData);
-
-
+			//append new data to lineData
 			lineData = lineData.concat(newData);
 
-			if (liveData) {
+			if (timeRangeLiveMode) {
 				//stores most recent date from linedata for live updating
 				mostRecentDateTime = moment(new Date(Math.max.apply(null, lineData.map(function(e) {
 					return new Date(e.UTCTimestamp);
