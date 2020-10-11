@@ -48,17 +48,15 @@ function updateGraph() {
 		loading.style("display", "block");
 		console.log("first update");
 	}
-	else { //on subsequent update (live data only).
+	else if (timeRangeLiveMode) { //on subsequent update (live data only).
 		console.log("subsequent update");
 		//mostRecentDateTime is the most recent date from the existing contents of lineData.
 		startDateTime = mostRecentDateTime;
 		//moment() is right now
-		endDateTime = moment();
-
-		console.log("starting " + startDateTime);
-		console.log("ending " + endDateTime);
+		endDateTime = moment().format("YYYY-MM-DDTHH:mm:ss.SSSS");
 	}
-
+	//console.log("starting " + startDateTime);
+	//console.log("ending " + endDateTime);
 	//select svg area
 	var svg = d3.select(chartDiv).select("svg");
 	var focus = d3.select(focusDiv).select("svg");
@@ -89,14 +87,19 @@ function updateGraph() {
 				d.Data = parseFloat(d.Data);
 			})
 
+			//console.log("existing data: ", lineData)
+			//console.log("new data: ", newData)
+
 			//append new data to lineData
 			lineData = lineData.concat(newData);
 
 			if (timeRangeLiveMode) {
 				//stores most recent date from linedata for live updating
-				mostRecentDateTime = moment(new Date(Math.max.apply(null, lineData.map(function(e) {
+				let newDate = new Date(Math.max.apply(null, lineData.map(function(e) {
 					return new Date(e.UTCTimestamp);
-				}))));
+				  })))
+				newDate.setMilliseconds(newDate.getMilliseconds() + 1); //add 1 ms to prevent the old data from getting picked up again
+				mostRecentDateTime = moment(newDate).utc().format("YYYY-MM-DDTHH:mm:ss.SSSS");
 			}
 
 			url = "http://ts20.billydasdev.com:3000/desc?canId=[" + yAxisIds.toString() + "]"
