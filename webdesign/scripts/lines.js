@@ -47,7 +47,8 @@ function updateGraph() {
 	//} else {
 	//	document.getElementById("loadingImg").src = "https://cdn.discordapp.com/attachments/691821735124795448/760064192731807754/waddle2.gif";
 	//}
-	//loading.style("display", "block");
+	
+	loading.style("display", "block");
 
 	//select svg area
 	var svg = d3.select(chartDiv).select("svg");
