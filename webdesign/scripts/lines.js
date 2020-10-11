@@ -6,6 +6,7 @@ var chartDiv = document.getElementById("chart");
 var focusDiv = document.getElementById("focus");
 var padding = 100;
 var firstUpdate = true;
+var isMovingAverage = false; // default to no filtering, updated later on
 
 var startDateTime = moment("2020-08-23T16:50:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');;
 var endDateTime = moment("2020-08-23T16:55:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');;
@@ -78,6 +79,10 @@ function updateGraph() {
 
 					// hide loading graphic
 					loading.style("display", "none");
+
+					if ( isMovingAverage ) {
+						lineData = movingAverage(lineData);
+					}
 
 					// draw line chart
 					lineChart(lineData, svg);
