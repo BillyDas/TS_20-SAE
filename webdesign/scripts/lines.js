@@ -39,15 +39,15 @@ function updateGraph() {
 		return;
 	}
 
-	var loadingImgRand = Math.floor(Math.random() * 2);
-	loading = d3.select(loadingGraph);
+	// loadingImgRand = Math.floor(Math.random() * 2);
+	//loading = d3.select(loadingGraph);
 	// TODO: make these NOT discord links...
-	if (loadingImgRand == 0) {
-		document.getElementById("loadingImg").src = "https://cdn.discordapp.com/attachments/691821735124795448/752082980218077184/loading.gif";
-	} else {
-		document.getElementById("loadingImg").src = "https://cdn.discordapp.com/attachments/691821735124795448/760064192731807754/waddle2.gif";
-	}
-	loading.style("display", "block");
+	//if (loadingImgRand == 0) {
+	//	document.getElementById("loadingImg").src = "https://cdn.discordapp.com/attachments/691821735124795448/752082980218077184/loading.gif";
+	//} else {
+	//	document.getElementById("loadingImg").src = "https://cdn.discordapp.com/attachments/691821735124795448/760064192731807754/waddle2.gif";
+	//}
+	//loading.style("display", "block");
 
 	//select svg area
 	var svg = d3.select(chartDiv).select("svg");
