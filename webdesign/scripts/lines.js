@@ -16,6 +16,11 @@ var minX, maxX, minY, maxY = null;
 var xAxisDataId = "";
 var yAxisDataId = "";
 
+var hostUrl = window.location.origin;
+if (hostUrl == null){
+	hostUrl = "http://ts20.billydasdev.com";
+}
+
 
 function initLines() {
 	// create svg
@@ -66,7 +71,7 @@ function updateGraph() {
 	}
 	
 
-	var url = "http://ts20.billydasdev.com:3000/data?canId=["
+	var url = hostUrl + ":3000/data?canId=["
 		+ yAxisIds.toString()
 		+ "]&startTime='" + startDateTime
 		+ "'&endTime='" + endDateTime + "'"
@@ -83,8 +88,8 @@ function updateGraph() {
 			})
 
 			let xAxisData = null;
+			url = hostUrl + ":3000/desc?canId=[" + yAxisIds.toString() + "]"
 
-			url = "http://ts20.billydasdev.com:3000/desc?canId=[" + yAxisIds.toString() + "]"
 			fetch(url)
 				.then(response => response.json())
 				.then(sensorDesc => {
@@ -99,7 +104,7 @@ function updateGraph() {
 
 					
 					if (xAxisIds != "") {
-						var url = "http://ts20.billydasdev.com:3000/data?canId=["
+						var url = hostUrl + ":3000/data?canId=["
 						+ xAxisIds.toString()
 						+ "]&startTime='" + startDateTime
 						+ "'&endTime='" + endDateTime + "'"
@@ -113,7 +118,7 @@ function updateGraph() {
 									d.Data = parseFloat(d.Data)
 								})
 
-								url = "http://ts20.billydasdev.com:3000/desc?canId=[" + xAxisIds.toString() + "]";
+								url = hostUrl + ":3000/desc?canId=[" + xAxisIds.toString() + "]";
 								fetch(url)
 									.then(response => response.json())
 									.then(xAxisDesc => {

@@ -8,16 +8,23 @@
 
 //Set up app
 const express = require('express');
-const app = express();
 const cors = require('cors');
-const port = 3000;
+const bodyParser = require('body-parser');
 
+const app = express();
+const port = 3000;
+const dbVars = {
+  host: 'db',
+  user: 'ts20',
+  password: 'ts20',
+  database: 'ts20'
+};
+
+//Set up required packages
 //Setup the API to use the CORS header
 app.use(cors())
 
-//Set up required packages
 //body parser - required to pull POST params into variables.
-const bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
@@ -48,12 +55,7 @@ app.post('/sync/single', function (req, res) {
   if (canid != null && data != null && datetime != null && hash == locHash) {
     try {
       //setup MySQL Connection
-      var connection = mysql.createConnection({
-        host: 'localhost',
-        user: 'ts20',
-        password: 'ts20',
-        database: 'ts20'
-      });
+      var connection = mysql.createConnection(dbVars);
       //Open MySQL Connection to push data to DB
       connection.connect();
       //Set up the query string to add data to the database
@@ -111,12 +113,7 @@ app.post('/sync', function (req, res) {
   if (hash == locHash) {
     try {
       //setup MySQL Connection
-      var connection = mysql.createConnection({
-        host: 'localhost',
-        user: 'ts20',
-        password: 'ts20',
-        database: 'ts20'
-      });
+      var connection = mysql.createConnection(dbVars);
       //Open MySQL Connection to push data to DB
       connection.connect();
       //Set up the query string to add data to the database
@@ -213,12 +210,7 @@ app.get('/data', function (req, res) {
 
   try {
     //setup MySQL Connection
-    var connection = mysql.createConnection({
-      host: 'localhost',
-      user: 'ts20',
-      password: 'ts20',
-      database: 'ts20'
-    });
+    var connection = mysql.createConnection(dbVars);
     //Open MySQL Connection to push data to DB
     connection.connect();
     //Set up the query string to get data from the database
@@ -284,12 +276,7 @@ app.get('/desc', function (req, res) {
   if (invalidParams == false) {
     try {
       //setup MySQL Connection
-      var connection = mysql.createConnection({
-        host: 'localhost',
-        user: 'ts20',
-        password: 'ts20',
-        database: 'ts20'
-      });
+      var connection = mysql.createConnection(dbVars);
       //Open MySQL Connection to pull data from DB
       connection.connect();
       //Set up the query string to get data from the database

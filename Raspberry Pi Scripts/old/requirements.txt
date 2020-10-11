@@ -1,0 +1,9 @@
+# Install DbSync.py Package Requirements
+mysql-connector
+requests
+hashlib
+
+# Install DbSync.py Package Requirements
+python-can
+logging 
+DateTime
