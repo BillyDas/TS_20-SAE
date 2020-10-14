@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 05, 2020 at 04:44 AM
+-- Generation Time: Oct 14, 2020 at 09:45 AM
 -- Server version: 5.7.31-0ubuntu0.18.04.1
 -- PHP Version: 7.2.24-0ubuntu0.18.04.6
 
@@ -19,6 +19,25 @@ SET time_zone = "+00:00";
 --
 -- Database: `ts20`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `CanTemplates`
+--
+
+CREATE TABLE `CanTemplates` (
+  `CanId` varchar(15) NOT NULL,
+  `Template` json NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `CanTemplates`
+--
+
+INSERT INTO `CanTemplates` (`CanId`, `Template`) VALUES
+('0x3ab', '{\"template\": [{\"index\": 0, \"length\": 1, \"offset\": 0, \"dataType\": \"int\"}, {\"index\": 1, \"length\": 1, \"offset\": 1, \"dataType\": \"int\"}, {\"index\": 2, \"length\": 1, \"offset\": 2, \"dataType\": \"int\"}, {\"index\": 3, \"length\": 1, \"offset\": 3, \"dataType\": \"int\"}, {\"index\": 4, \"length\": 1, \"offset\": 4, \"dataType\": \"int\"}, {\"index\": 5, \"length\": 1, \"offset\": 5, \"dataType\": \"int\"}, {\"index\": 6, \"length\": 1, \"offset\": 6, \"dataType\": \"int\"}, {\"index\": 7, \"length\": 1, \"offset\": 7, \"dataType\": \"int\"}]}'),
+('DEFAULT', '{\"template\": [{\"index\": 0, \"length\": 1, \"offset\": 0, \"dataType\": \"float\"}]}');
 
 -- --------------------------------------------------------
 
@@ -63522,7 +63541,8 @@ INSERT INTO `SensorData` (`SensorDataId`, `CanId`, `Data`, `UTCTimestamp`) VALUE
 (63401, '0x1b', '-1.6260946989059448', '2020-08-23 16:55:27.824454'),
 (63402, '0x10', '0.5', '2020-08-23 16:55:28.458790'),
 (63403, '0x10', '0.5', '2020-08-23 16:55:28.900000'),
-(63404, '0x10', '0.5', '2020-08-23 16:55:28.900000');
+(63404, '0x10', '0.5', '2020-08-23 16:55:28.900000'),
+(63405, '0xf', '0.5', '2020-08-23 16:55:29.955730');
 
 -- --------------------------------------------------------
 
@@ -63613,6 +63633,12 @@ INSERT INTO `SensorUnit` (`UnitId`, `UnitName`, `UnitMetric`) VALUES
 --
 
 --
+-- Indexes for table `CanTemplates`
+--
+ALTER TABLE `CanTemplates`
+  ADD PRIMARY KEY (`CanId`);
+
+--
 -- Indexes for table `SensorData`
 --
 ALTER TABLE `SensorData`
@@ -63647,7 +63673,7 @@ ALTER TABLE `SensorUnit`
 -- AUTO_INCREMENT for table `SensorData`
 --
 ALTER TABLE `SensorData`
-  MODIFY `SensorDataId` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63405;
+  MODIFY `SensorDataId` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63406;
 --
 -- AUTO_INCREMENT for table `SensorType`
 --

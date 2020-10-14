@@ -54,10 +54,9 @@ while(True):
     else:
         message = bus.recv()
         if message != None:
-            logging.debug("Message Recieved on CAN bus")
-            unpacked = struct.unpack_from("<f", message.data, 0)
+            logging.debug("Message Recieved on CAN bus")            
+            hexData = ''.join(format(byte, '02X') for byte in message.data)
+            logging.debug(hexData)            
             timestamp = message.timestamp
-            canId = message.arbitration_id
-            data = tuple(unpacked)[0]
-            addDB(canId, timestamp, data)
-        
+            canId = message.arbitration_id            
+            addDB(canId, timestamp, hexData)
