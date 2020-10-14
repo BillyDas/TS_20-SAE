@@ -10,8 +10,9 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-
 const app = express();
+
+//SET UP API PORT AND VARIABLES
 const port = 3000;
 const dbVars = {
   host: 'db',
@@ -33,6 +34,7 @@ const crypto = require('crypto');
 
 //mysql - required to push data to the SQL server.
 var mysql = require('mysql');
+const { raw } = require('body-parser');
 
 //Setup the API routes
 //GET method route
@@ -43,8 +45,7 @@ app.get('/', function (req, res) {
 /***********************************************************************************************
  *  DBSync POST Request Route
  ***********************************************************************************************/
-app.post('/sync', function (req, res) {
-  var errors = false;
+app.post('/sync', async function (req, res) {
   //get POST params to variables
   var rawdata = String(req.body.data);
   var hash = req.body.hash;
@@ -53,36 +54,28 @@ app.post('/sync', function (req, res) {
   var dataArr = JSON.parse(rawdata);
   //Check Parameters are valid
   if (hash == locHash) {
-    try {
-      //fix data before adding to DB -> THIS IS WHERE THE IMPLEMENTATION OF TEMPLATES SHOULD TAKE PLACE
-      dataArr.forEach(item => item.Data = Buffer.from(item.Data, 'hex').readFloatLE(0));
+    try{
       //setup MySQL Connection
       var connection = mysql.createConnection(dbVars);
       //Open MySQL Connection to push data to DB
       connection.connect();
-      //Set up the query string to add data to the database
-      var query = `INSERT INTO SensorData(CanId, Data, UTCTimestamp) VALUES ?`;
-      //Add Record to DB in SensorData Table
-      connection.query(query, [dataArr.map(item => [item.CanId, item.Data, item.UTCTimestamp])], function (err) {
-        //if an error occurs catch it and log to the console.
-        if (err) {
-          console.log(err);
-          errors = true;
-        }
-      });
-      //Close MySQL Connection
-      connection.end();
-      //catch any errors from adding the data to the database and opening the connection to the db
-    } catch (ex) {
-      console.log(ex);
-      errors = true;
-    }
-    //if there were no errors respond with a 200 OK status
-    if (!errors) {
+      //Extract data from the raw data paresed
+      var extractedData = await extractData(connection, dataArr);
+      //If we are unable to extract data throw error
+      if (extractData.length == 0){
+        throw "Error Extracting data!";
+      }
+      //Push data to the database and throw an error if unsuccessful
+      if (await pushExtractedDB(connection, extractedData) !== "OK"){
+        throw "Error pushing extracted data to DB!";
+      }
+      //Data was pushed to the database so send 200 OK to allow removal from RPI DB
       res.status(200).send("Added to DB successfully");
-    } else {
-      //otherwise there were errors so return a 500 internal server error with the error message.
-      res.status(500).send('Error Occurred adding data to DB: \n' + ex);
+    }
+    catch(ex){
+      console.log('Error Occured!');
+      console.log(ex);
+      res.status(500).send('Error Occured: ' + ex);
     }
   }
   //incorrect parameters passed in POST request
@@ -98,7 +91,108 @@ app.post('/sync', function (req, res) {
       res.send('Bad Request: Hash did not match, data may be corrupted!');
     }
   }
+
+
 });
+
+/***********************************************************************************************
+ *  DBSync Support Functions
+ ***********************************************************************************************/
+//Pushes extracted data into the database
+async function pushExtractedDB(connection, data){  
+  return new Promise(function(resolve, reject){
+    var query = `INSERT INTO SensorData(CanId, Data, UTCTimestamp) VALUES ?`;  
+    connection.query(query, [data.map(item => [item.CanId, item.Data, item.UTCTimestamp])], function (err) {
+      //if an error occurs catch it and log to the console.
+      if (err) {
+        reject(err.toString());
+      }
+      else{
+        resolve("OK");
+      }
+    }); 
+  });
+}
+
+//Retrieves the template for the CAN ID in the DB, if it cant find the template it gets the DEFAULT
+async function getTemplate(connection, canId){  
+  return new Promise(function(resolve, reject){
+    var query = `SELECT Template FROM CanTemplates WHERE CanId = ?`;  
+    connection.query(query, [canId], function (err, result) {
+      //if an error occurs catch it and log to the console.
+      if (err) {      
+        reject(err);
+      }
+      else{
+        //if we got a template then return it
+        if (result.length == 1){                    
+          resolve(result[0].Template);
+        } 
+        //If we couldnt get the template then get the defualt template to apply
+        else{
+          getTemplate(connection, 'DEFAULT').then(template => resolve(template));          
+        }
+      }
+    });
+  });
+}
+
+//Applies the JSON template to the raw data to split it into 0xAB-C and respective pieces of data
+//As per what P+E have said is the new standard.
+function applyTemplate(raw, template){
+  //raw.CanId, raw.Data, raw.UTCTimestamp  
+  var templates = null;  
+  var parsed = JSON.parse(template);  
+  templates = parsed.template;  
+  var extractedData = [];
+  var dataBuffer = Buffer.from(raw.Data, 'hex');
+  //extract the data according to each sub template
+  templates.forEach(subTemplate => {
+    var data = null;    
+    switch (subTemplate.dataType) {
+      case "int":
+        data = dataBuffer.readIntLE(subTemplate.offset, subTemplate.length);
+        break;
+      case "intBE":
+        data = dataBuffer.readIntBE(subTemplate.offset, subTemplate.length);
+        break;
+      case "float":
+        data = dataBuffer.readFloatLE(subTemplate.offset);
+        break;
+      case "floatBE":
+        data = dataBuffer.readFloatBE(subTemplate.offset);
+        break;  
+      default:
+        break;
+    }       
+    if (data != null){
+      //apply the rest of the objects of the data to the new data piece
+      var canId = raw.CanId;
+      //Apply 0xAB-C notation if there is more than 1 bit of data for a can id
+      if (templates.length > 1){
+        canId += '-' + subTemplate.index; 
+      }         
+      extractedData.push({
+        CanId: canId,
+        Data:  data,
+        UTCTimestamp:  raw.UTCTimestamp
+      });
+    } 
+  });
+  return extractedData;
+}
+
+//Function to extact the data, gets the template then applies it
+async function extractData(connection, dataArr){  
+  var extractedData = [];
+  for (let data of dataArr){    
+    var template = await getTemplate(connection, data.CanId);
+    var extracted = applyTemplate(data, template);
+    extracted.forEach(extData => extractedData.push(extData));     
+  }  
+  return extractedData;
+}
+
 
 /***********************************************************************************************
  *  Datavis GET Request Route
@@ -112,6 +206,7 @@ app.get('/data', function (req, res) {
     maxResults = 10;
   }
 
+  //BUILD THE QUERY STRING
   var WhereStmts = [];
 
   var IDWhere = "";
@@ -197,6 +292,7 @@ app.get('/desc', function (req, res) {
   var errors = false;
   var invalidParams = false;
 
+  //BUILD QUERY STRING
   var IDWhere = "";
   var rawSensorID = req.query.canId;
   if (rawSensorID != null) {
