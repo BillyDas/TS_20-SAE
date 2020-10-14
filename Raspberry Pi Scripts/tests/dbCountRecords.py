@@ -1,7 +1,7 @@
 #############################################################
-#   Database Sync v1.0.0
+#   DB Count Records v1.0.0
 #   Author: Baylin Ferguson
-#   Description: This software syncs the local DB with the cloud via the cloud API
+#   Description: This software outputs the amount of records in the database for testing purposes
 #############################################################
 import mysql.connector
 import os
