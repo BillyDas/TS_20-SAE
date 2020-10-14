@@ -1,3 +1,8 @@
+#############################################################
+#   CANListener v1.0.0
+#   Author: Baylin Ferguson
+#   Description: This software listens on the CAN bus and prints the messages recieved
+#############################################################
 import can
 import struct
 
