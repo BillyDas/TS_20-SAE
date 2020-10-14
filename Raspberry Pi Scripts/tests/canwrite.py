@@ -1,3 +1,8 @@
+#############################################################
+#   CANWrite v1.0.0
+#   Author: Baylin Ferguson
+#   Description: This software outputs a test message on the CAN bus to test the system
+#############################################################
 #!/usr/bin/env python3
 # coding: utf-8
 import can
