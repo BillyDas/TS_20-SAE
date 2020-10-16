@@ -1,7 +1,7 @@
 .menuheading {
   text-align: center !important;
-  font-weight: bold;
-  margin-top: -15px;
-  font-size: 20px;
+  margin-top: 0px;
+  font-size: 12px;
   padding-left: 5px;
+  color: rgb(129, 129, 129);
 }
