@@ -149,4 +149,9 @@ fieldset {
         max-width: 0em;
         max-height: 0em;
     }
+
+    .menuheading {
+        display: none 
+    }
+      
 }
