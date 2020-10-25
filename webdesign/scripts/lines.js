@@ -92,6 +92,9 @@ function updateGraph() {
 
 			//append new data to lineData
 			lineData = lineData.concat(newData);
+			lineData = lineData.sort(function(a,b){
+				return b.UTCTimestamp -  a.UTCTimestamp;
+			});
 
 			if (timeRangeLiveMode) {
 				//stores most recent date from linedata for live updating
@@ -438,6 +441,7 @@ function focusChart(data, svg, focus) {
 			.attr("transform", "translate(0, " + (focusHeight + 1) + ")")
 			.call(xAxis, xScale, focusHeight);
 
+		
 		focus.selectAll(".line")
 			.data(sumstat)
 			.enter()
