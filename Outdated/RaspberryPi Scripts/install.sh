@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #This script will install dependencies and install the required scripts for the TS20 Data Visualisation
 #Version 1.0
 
@@ -19,11 +18,9 @@ while true; do
     case $yn in
         [Yy]* ) break;;
         [Nn]* ) exit;;
-        * ) echo -e "${RED}Please answer yes [y] or no [N].${NOCOLOR}" >&2;;
+        * ) echo -e "${RED}Please answer yes [y] or no [N].${NOCOLOR}";;
     esac
 done
-
-echo -e "Starting Installation."
 
 #ensure user is superuser, if not exit
 if [ $(id -u) != "0" ]; then
@@ -32,14 +29,15 @@ if [ $(id -u) != "0" ]; then
 fi
 
 #ensure raspberry pi is up to date
-echo -e "${GREEN}Python 3 Installed${NOCOLOR}" >&1
+echo -e "Updating Raspberry Pi"
 apt-get update -y > /dev/null
 
 #check that python3 is installed
+
 if [[ ! -z $(which python3 | grep "/python3") ]]; then
-    echo -e "${GREEN}[DPND] Python 3 Installed${NOCOLOR}" >&1
+    echo -e "${GREEN}Python 3 Installed${NOCOLOR}" >&1
 else
-    echo -e "${RED}[DPND]Python 3 Not installed, Please Install.${NOCOLOR}" >&2
+    echo -e "${RED}Python 3 Not installed, Please Install.${NOCOLOR}" >&2
     exit 1
 fi
 
@@ -47,8 +45,8 @@ fi
 if [[ ! -z $(which pip | grep "/pip") ]]; then
    echo -e "${GREEN}[DPND]Python 3 pip Installed${NOCOLOR}" >&1
 else
-    echo -e "${RED}[DPND]Python 3 pip Not installed, Please Install.${NOCOLOR}" >&2
-    exit 1
+    echo -e "${RED}[DPND]Python 3 pip Not installed, Attempting to Install.${NOCOLOR}" >&2
+    apt-get install -y python3-pip > /dev/null
 fi
 
 #Download Master Repo from GitHub and Unzip
@@ -71,8 +69,45 @@ ip link set vcan0 up
 
 #Install Database
 echo -e "Installing MariaDB"
+[ ! -e /usr/bin/expect ] && { apt-get -y install expect > /dev/null; }
 sudo apt-get install mariadb-server -y > /dev/null
-echo -e "${GREEN}Installed MariaDB${NOCOLOR}"
+echo -e "${GREEN}[DPND]MariaDB Installed${NOCOLOR}" >&1
+echo -e "Configuring MariaDB"
+MYSQL_ROOT_PASSWORD=TeamSwinburneFSAE2020!
+SECURE_MYSQL=$(expect -c "
+set timeout 10
+spawn mysql_secure_installation
+expect \"Enter current password for root (enter for none):\"
+send \"$MYSQL\r\"
+expect \"Change the root password?\"
+send \"n\r\"
+expect \"Remove anonymous users?\"
+send \"y\r\"
+expect \"Disallow root login remotely?\"
+send \"y\r\"
+expect \"Remove test database and access to it?\"
+send \"y\r\"
+expect \"Reload privilege tables now?\"
+send \"y\r\"
+expect eof
+")
+echo "$SECURE_MYSQL"
+echo -e "${GREEN}Configured MariaDB${NOCOLOR}"
+
+#Setup Database
+echo -e "Setting up MariaDB"
+mysql -u root -p $MYSQL_ROOT_PASSWORD ts20 < ts20.sql
+echo -e "${GREEN}Database Configuration Complete${NOCOLOR}"
+
+echo -e ""
+echo -e ""
+echo -e "${GREEN}######################################${NOCOLOR}"
+echo -e ""
+echo -e "${GREEN}Install Complete${NOCOLOR}"
+echo -e ""
+echo -e "${GREEN}######################################${NOCOLOR}"
+
+
 
 
 

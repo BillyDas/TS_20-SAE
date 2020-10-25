@@ -1,0 +1,23 @@
+CREATE DATABASE 'ts20';
+
+USE 'ts20';
+
+CREATE TABLE `SensorData` (
+  `SensorDataId` int(5) NOT NULL,
+  `CanId` varchar(15) DEFAULT NULL,
+  `Data` varchar(50) DEFAULT NULL,
+  `UTCTimestamp` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+ALTER TABLE `SensorData`
+  ADD PRIMARY KEY (`SensorDataId`),
+  ADD KEY `CanId` (`CanId`);
+
+ALTER TABLE `SensorData`
+  MODIFY `SensorDataId` int(5) NOT NULL AUTO_INCREMENT;
+
+CREATE USER 'ts20'@localhost IDENTIFIED BY 'ts20';
+
+GRANT ALL PRIVILEGES ON 'ts20'.* TO 'ts20'@localhost IDENTIFIED BY 'ts20';
+
+FLUSH PRIVILEGES;

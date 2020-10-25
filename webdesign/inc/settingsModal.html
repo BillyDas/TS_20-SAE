@@ -13,14 +13,14 @@
                     <tbody>
                         <tr>
                             <td>
-                                <label for="xAxisSelectPicker">X-Axis Sensors: </label>
+                                <label for="xAxisSelectPicker">X-Axis Sensor (1): </label>
                             </td>
                             <td>
-                                <select id="xAxisSelectPicker" class="selectpicker" multiple data-live-search="true"
+                                <select id="xAxisSelectPicker" class="selectpicker" data-live-search="true"
                                     data-selected-text-format="count > 1" data-size="5">
-                                    <option value="" disabled>Choose x-axis sensors</option>
-                                    <option value="Time" disabled selected>Time</option>
-                                    <!--<?php echoSensors() ?> -->
+                                    <option value="" disabled>Choose x-axis sensor (1)</option>
+                                    <option value="Time" selected>Time</option>
+                                    <?php echoSensors() ?> <!-- commented out -->
                                 </select>
                             </td>
                         </tr>

@@ -1,0 +1,30 @@
+version: '3'
+services:
+    api:
+        build: ./api
+        container_name: ts20api
+        links:
+            - "db:database"
+        ports:
+            - "3000:3000"
+    web:
+        build: ./web
+        container_name: ts20web
+        links:
+            - "db:database"
+            - "api"
+        ports:
+            - "80:80"
+    db:
+        image: mariadb:latest
+        container_name: ts20db
+        volumes:
+            - dbdata:/var/lib/mysql
+            - ./db/ts20.sql:/docker-entrypoint-initdb.d/dump.sql
+        environment: 
+            MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+            MYSQL_DATABASE: ts20
+            MYSQL_USER: ts20
+            MYSQL_PASSWORD: ts20
+volumes:
+    dbdata:
