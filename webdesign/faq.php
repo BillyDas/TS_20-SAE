@@ -24,13 +24,6 @@
    
    <h3>• How do I access a graph?</h3>
    <p>Click on of the three preloaded graphs on the left, or create a custom visualisation. <br/>In a custom visualisation, you can select the date / time range to display, as well as which data to display on each axis.</p>
-   
-   <h3>• How do I remove a sensor?</h3>
-   
-   <h3>• How can I delete data?</h3>
-   
-   <h3>• How do I find the CanID of a new sensor?</h3>
-   <p>For newly added sensors, the CanID should be automatically added, and the ID available in the <a href="addnewsensors.php">add new sensor</a> page.<br/>If it is not present, you may need to manually add it.</p>
 </div>
 </body>
 </html>
