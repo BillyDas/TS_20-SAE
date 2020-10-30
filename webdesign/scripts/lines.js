@@ -18,9 +18,13 @@ var minX, maxX, minY, maxY = null;
 var xAxisDataId = "";
 var yAxisDataId = "";
 
+var dynamicPaddingLeft;
+
+var tempHack = 0;
+
 var hostUrl = window.location.origin;
 if (hostUrl == null){
-	hostUrl = "http://ts20.billydasdev.com";
+	var hostUrl = "http://ts20.billydasdev.com";
 }
 
 
@@ -34,6 +38,7 @@ function initLines() {
 }
 
 function updateGraph() {
+	tempHack = 0;
 	// TODO: these are subject to change, but are temporary and needed for loading img
 
 	if (yAxisDataId === "" || startDateTime === "" || endDateTime === "") // xAxis needs to be added when configured
@@ -56,8 +61,11 @@ function updateGraph() {
 	var svg = d3.select(chartDiv).select("svg");
 	var focus = d3.select(focusDiv).select("svg");
 
-
 	var xAxisIds = xAxisDataId;
+	
+	if (xAxisIds == "Time") {
+		xAxisIds = "";
+	}
 
 	// list of sensors available
 	var yAxisIds = yAxisDataId;
@@ -68,6 +76,7 @@ function updateGraph() {
 			yAxisIds[i] = '"' + yAxisIds[i] + '"';
 		}
 	}
+
 	if (xAxisIds != "")
 	{
 		xAxisIds = '"' + xAxisIds + '"';
@@ -105,7 +114,6 @@ function updateGraph() {
 						sensorNameCache[d.CanId] = d.Name + ' (' + d.UnitMetric + ')';
 					})
 
-					
 					if (xAxisIds != "") {
 						var url = hostUrl + ":3000/data?canId=["
 						+ xAxisIds.toString()
@@ -135,7 +143,7 @@ function updateGraph() {
 										loading.style("display", "none");
 										
 										// draw line chart
-										lineChart(lineData, svg, xAxisData);
+										lineChart(lineData, svg, xAxisData, firstUpdate);
 										focusChart(lineData, svg, focus, xAxisData);
 										
 										if (firstUpdate) {
@@ -154,8 +162,8 @@ function updateGraph() {
 						loading.style("display", "none");
 						
 						// draw line chart
-						lineChart(lineData, svg, xAxisData);
-						focusChart(lineData, svg, focus, xAxisData);
+						lineChart(lineData, svg, null, firstUpdate);
+						focusChart(lineData, svg, focus);
 						
 						if (firstUpdate) {
 							// add listener to draw on resize
@@ -180,11 +188,29 @@ function updateGraph() {
 		});
 }
 
-function lineChart(data, svg, xAxisData = null) {
+function lineChart(data, svg, xAxisData = null, firstUpdate = false) {
+	// if (xAxisData != null && tempHack && !firstUpdate) {
+	// 	tempHack = false;
+	// 	console.log("blur");
+	// }
+	
+	// linechart is being called twice for some reason
+	// i don't want to talk about it
+
+	// if adding blurring to scatterplot interaction
+	// if (firstUpdate) {
+	// 	tempHack++;
+	// } else if (tempHack == 1) {
+	// 	tempHack++;
+	// } else if (tempHack == 2) {
+	// 	if (xAxisData != null) {
+	// 		// blurring could go here
+	// 	}
+	// }
 
 	let groupedSensors = groupBy(sensorDescCache, "UnitName");
 
-	var dynamicPaddingLeft = 18;
+	dynamicPaddingLeft = 18;
 	dynamicPaddingLeft = (groupedSensors.length + 1) * dynamicPaddingLeft + 25;
 
 	// clear canvas
@@ -198,7 +224,6 @@ function lineChart(data, svg, xAxisData = null) {
 	svg
 		.attr("width", w)
 		.attr("height", h);
-
 
 	if (xAxisData != null) {
 		// TODO: this is a terrible TERRIBLE TERRIBLE way of doing it, PLEASE fix
@@ -239,8 +264,6 @@ function lineChart(data, svg, xAxisData = null) {
 				let dupe;
 
 				dupe = Object.assign({}, a);
-				// console.log(a);
-				// console.log(dupe);
 
 				for (let i = 1; i < result.length; i++) {
 					dupe.xAxisVal = result[1].Data;
@@ -256,8 +279,6 @@ function lineChart(data, svg, xAxisData = null) {
 
 		//alert("Dropped " + droppedData + " points of data.");
 	}
-
-	
 
 	// group data based on CanId
 	var sumstat = d3.nest()
@@ -287,6 +308,7 @@ function lineChart(data, svg, xAxisData = null) {
 		if (minX != null && maxX != null) {
 			xScale = d3.scaleTime()
 				.domain([minX, maxX])
+				//.domain(d3.extent(data, function (d) { return d.UTCTimestamp; }))
 				.range([dynamicPaddingLeft, (w - w * 0.1) - padding]) // temp fix for names not fitting
 			//.nice();
 		} else {
@@ -409,91 +431,105 @@ function lineChart(data, svg, xAxisData = null) {
 		.attr("height", chartDiv.clientHeight)
 		.attr("fill", "#ccffff");
 
-	// if x axis isnt time:
-	if (xAxisData != null) {
-		// every line is pain
+	if (!firstUpdate) {
+				// if x axis isnt time:
+		if (xAxisData != null) {
+			// every line is pain
 
-		// const g = svg.append("g")
-		// 	.attr("fill", "none")
-		// 	.attr("stroke-linecap", "round");
+			// const g = svg.append("g")
+			// 	.attr("fill", "none")
+			// 	.attr("stroke-linecap", "round");
 
-		// sumstat.forEach(function(d) {
-		// 	g.selectAll(".path")
-		// 	.data(d.values)
-		// 	.join("path")
-		// 		.attr("d", function (d) { return `M${xScale(d.xAxisVal)},${yScale(d.Data)}h0` } )
-		// 		.attr("stroke", function (d) { return color(d.CanId) })
-		// 	.attr("clip-path", "url(#chartClip)");
-		// })
+			// sumstat.forEach(function(d) {
+			// 	g.selectAll(".path")
+			// 	.data(d.values)
+			// 	.join("path")
+			// 		.attr("d", function (d) { return `M${xScale(d.xAxisVal)},${yScale(d.Data)}h0` } )
+			// 		.attr("stroke", function (d) { return color(d.CanId) })
+			// 	.attr("clip-path", "url(#chartClip)");
+			// })
+			
+
+
+
+			sumstat.forEach(function(d) {
+				svg.selectAll(".dot")
+					.data(d.values)
+					.enter()
+					.append("circle")
+						.attr("cx", function(d) { return xScale(d.xAxisVal) } )
+						.attr("cy", function (d) { return yScale(d.Data) } )
+						.attr("r", 2)
+						.attr("opacity", 0.3)
+						.style("fill", function (d) { return color(d.CanId)
+					}).attr("clip-path", "url(#chartClip)");
+			})
+
+			// d3.selectAll("circle")
+			// 	.transition()
+			// 	.delay(function(d,i) {console.log(i); return i*5;})
+			// 	.duration(100)
+			// 	.ease(d3.easeBounce)
+			// 	.attr("r", 2)
 		
 
-
-
-		sumstat.forEach(function(d) {
-			svg.selectAll(".dot")
-				.data(d.values)
+		} else {
+			// add sensors as lines to the svg
+			svg.selectAll(".line")
+				.data(sumstat)
 				.enter()
-				.append("circle")
-					.attr("cx", function(d) { return xScale(d.xAxisVal) } )
-					.attr("cy", function (d) { return yScale(d.Data) } )
-					.attr("r", 2)
-					.attr("opacity", 0.3)
-					.style("fill", function (d) { return color(d.CanId)
+				.append("path")
+				.attr("class", "line")
+				.attr("fill", "none")
+				.attr("stroke", function (d) { return color(d.key); })
+				.attr("stroke-width", 1.5)
+				.attr("d", function (d) {
+					return d3.line()
+						.x(function (d) { return xScale(d.UTCTimestamp); })
+						.y(function (d) { return yScale(d.Data); })
+						(d.values)
 				}).attr("clip-path", "url(#chartClip)");
-		})
+		}
 
-	
-
-	} else {
-		// add sensors as lines to the svg
-		svg.selectAll(".line")
-			.data(sumstat)
+		// add dots for the legend
+		svg.selectAll("legenddots")
+			.data(sensorNames)
 			.enter()
-			.append("path")
-			.attr("class", "line")
-			.attr("fill", "none")
-			.attr("stroke", function (d) { return color(d.key); })
-			.attr("stroke-width", 1.5)
-			.attr("d", function (d) {
-				return d3.line()
-					.x(function (d) { return xScale(d.UTCTimestamp); })
-					.y(function (d) { return yScale(d.Data); })
-					(d.values)
-			}).attr("clip-path", "url(#chartClip)");
+			.append("circle")
+			.attr("cx", (w - w * 0.1) - 80)
+			.attr("cy", function (d, i) { return 100 + i * 25 })
+			.attr("r", 7)
+			.style("fill", function (d) { return color(d) })
+
+		// add legend text for each sensor
+		svg.selectAll("legendnames")
+			.data(sensorNames)
+			.enter()
+			.append("text")
+			.attr("x", (w - w * 0.1) - 70)
+			.attr("y", function (d, i) { return 100 + i * 25 }) // 100 is where the first dot appears. 25 is the distance between dots
+			.style("fill", function (d) { return color(d) })
+			.text(function (d) { return sensorNameCache[d] })
+			.attr("text-anchor", "left")
+			.style("alignment-baseline", "middle")
+
+		// add a title to the chart
+		/*svg.append("text")
+			.attr("transform", "translate(" + w / 2 + ", " + (padding / 2) + ")")
+			.style("text-anchor", "middle")
+			.style("font-size", "1.5em")
+			.text("Sensor Data Information for SAE Formula Car");*/
+
 	}
-
-	// add dots for the legend
-	svg.selectAll("legenddots")
-		.data(sensorNames)
-		.enter()
-		.append("circle")
-		.attr("cx", (w - w * 0.1) - 80)
-		.attr("cy", function (d, i) { return 100 + i * 25 })
-		.attr("r", 7)
-		.style("fill", function (d) { return color(d) })
-
-	// add legend text for each sensor
-	svg.selectAll("legendnames")
-		.data(sensorNames)
-		.enter()
-		.append("text")
-		.attr("x", (w - w * 0.1) - 70)
-		.attr("y", function (d, i) { return 100 + i * 25 }) // 100 is where the first dot appears. 25 is the distance between dots
-		.style("fill", function (d) { return color(d) })
-		.text(function (d) { return sensorNameCache[d] })
-		.attr("text-anchor", "left")
-		.style("alignment-baseline", "middle")
-
-	// add a title to the chart
-	/*svg.append("text")
-		.attr("transform", "translate(" + w / 2 + ", " + (padding / 2) + ")")
-		.style("text-anchor", "middle")
-		.style("font-size", "1.5em")
-		.text("Sensor Data Information for SAE Formula Car");*/
 }
 
 // TODO: add scatterplot support
 function focusChart(data, svg, focus, xAxisData = null) {
+
+	
+
+
+
 	// clear canvas
 	d3.selectAll("#focus svg > *").remove();
 
@@ -535,11 +571,11 @@ function focusChart(data, svg, focus, xAxisData = null) {
 			// TODO: this is a terrible TERRIBLE TERRIBLE way of doing it, PLEASE fix
 			data.forEach(function(d) {
 				d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
-			})
-	
+			});
+
 			xAxisData.forEach(function(d) {
 				d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
-			})
+			});
 	
 			let extraData = [];
 			// data.forEach(function(a) {
@@ -570,8 +606,6 @@ function focusChart(data, svg, focus, xAxisData = null) {
 					let dupe;
 	
 					dupe = Object.assign({}, a);
-					// console.log(a);
-					// console.log(dupe);
 	
 					for (let i = 1; i < result.length; i++) {
 						dupe.xAxisVal = result[1].Data;
@@ -607,24 +641,53 @@ function focusChart(data, svg, focus, xAxisData = null) {
 
 
 
+		// var xScale = null;
+		// if (xAxisData != null) {
+		// 	xScale = d3.scaleLinear()
+		// 		.domain(d3.extent(xAxisData, function (d) { return d.Data; }))
+		// 		.range([padding, w - padding])
+		// 		//.nice();
+		// } else {
+		// 	if (minX != null && maxX != null) {
+		// 		xScale = d3.scaleTime()
+		// 			.domain([minX, maxX])
+		// 			.range([padding, w - padding])
+		// 		//.nice();
+		// 	}
+		// 	else {
+		// 		// set x axis to scale based on times
+		// 		xScale = d3.scaleTime()
+		// 			.domain(d3.extent(data, function (d) { return d.UTCTimestamp; }))
+		// 			.range([padding, w - padding])
+		// 		//.nice();
+		// 	}	
+		// }
+
 		var xScale = null;
 		if (xAxisData != null) {
-			xScale = d3.scaleLinear()
-				.domain(d3.extent(xAxisData, function (d) { return d.Data; }))
-				.range([padding, w - padding])
+			if (minX != null && maxX != null) {
+				xScale = d3.scaleLinear()
+					.domain([minX, maxX])
+					.range([dynamicPaddingLeft, (w - w * 0.1) - padding]) // temp fix for names not fitting
 				//.nice();
+			} else {
+				xScale = d3.scaleLinear()
+					.domain(d3.extent(xAxisData, function (d) { return d.Data; }))
+					.range([dynamicPaddingLeft, (w - w * 0.1) - padding]);
+				//.nice();
+			}
 		} else {
 			if (minX != null && maxX != null) {
 				xScale = d3.scaleTime()
 					.domain([minX, maxX])
-					.range([padding, w - padding])
+					//.domain(d3.extent(data, function (d) { return d.UTCTimestamp; }))
+					.range([dynamicPaddingLeft, (w - w * 0.1) - padding]) // temp fix for names not fitting
 				//.nice();
-			}
-			else {
+			} else {
 				// set x axis to scale based on times
 				xScale = d3.scaleTime()
 					.domain(d3.extent(data, function (d) { return d.UTCTimestamp; }))
-					.range([padding, w - padding])
+					.range([dynamicPaddingLeft, (w - w * 0.1) - padding])
 				//.nice();
 			}	
 		}
@@ -691,7 +754,9 @@ function focusChart(data, svg, focus, xAxisData = null) {
 			.range(d3.schemeCategory10);
 
 		const brush = d3.brushX()
-			.extent([[padding, 0.5], [w - padding, focusHeight + 0.5]])
+			//.extent([[dynamicPaddingLeft, 0.5], [w - padding, focusHeight + 0.5]])
+			
+			.extent([[dynamicPaddingLeft, 0.5], [dynamicPaddingLeft + d3.select('.domain').node().getBoundingClientRect().width, focusHeight + 0.5]])
 			.on("brush", brushed)
 			.on("end", brushended);
 
@@ -715,7 +780,19 @@ function focusChart(data, svg, focus, xAxisData = null) {
 						.attr("r", 2)
 						.attr("opacity", 0.3)
 						.style("fill", function (d) { return color(d.CanId)})
+					.attr("clip-path", "url(#chartClip)");
 			})
+
+			
+
+			// d3.selectAll("circle")
+			// 	.transition()
+			// 	.delay(function(d,i) {return i})
+			// 	.duration(2000)
+			// 	.attr("cx", function(d) { return xScale(d.xAxisVal) } )
+			// 	.attr("cy", function (d) { return focusYScale(d.Data) } )
+
+			
 			// const g2 = focus.append("g")
 			// .attr("fill", "none")
 			// .attr("stroke-linecap", "round");
@@ -745,7 +822,7 @@ function focusChart(data, svg, focus, xAxisData = null) {
 						.y(function (d) { return focusYScale(d.Data); })
 						(d.values)
 				})
-				//.attr("clip-path", "url(#chartClip)");
+				.attr("clip-path", "url(#chartClip)");
 		}
 
 
@@ -770,7 +847,7 @@ function focusChart(data, svg, focus, xAxisData = null) {
 			.call(brush)
 
 		if (persistentSelection === null) {
-			gb.call(brush.move, defaultSelection)
+			gb.call(brush.move, defaultSelection);
 		} else {
 			gb.call(brush.move, [xScale(persistentSelection[0]), xScale(persistentSelection[1])])
 		}

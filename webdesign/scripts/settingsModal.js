@@ -121,6 +121,10 @@ function controlUpdate() {
     if ($('#yAxisSelectPicker').val() != "" &&
         $('#startDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "" &&
         $('#endDateTime').datetimepicker('date').format('YYYY-MM-DDTHH:mm:ss.SSS') != "") {
+		
+		persistentSelection = null;
+		minX = null;
+		maxX = null;
         updateGraph();
     }
     else {
