@@ -95,3 +95,8 @@ body
 #control{
         margin-bottom: 1vh;
 }
+
+html.reset-all-cursors *
+{
+    cursor: inherit !important;
+}
