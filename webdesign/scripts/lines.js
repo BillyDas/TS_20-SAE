@@ -1,5 +1,4 @@
 var loading;
-
 var persistentSelection = null;
 var sensorNameCache = {}; // might be redundant now that i'm storing it all
 var sensorDescCache = [];
@@ -207,6 +206,13 @@ function lineChart(data, svg, xAxisData = null, firstUpdate = false) {
 	// 		// blurring could go here
 	// 	}
 	// }
+
+	//document.documentElement.style.cursor = "progress";
+	//document.getElementsByTagName( 'html' )[0].classList.add("reset-all-cursors")
+	//document.body.style.cursor = 'wait';
+	//document.body.classList.add("waiting");
+	
+	console.log("a")
 
 	let groupedSensors = groupBy(sensorDescCache, "UnitName");
 
@@ -521,12 +527,16 @@ function lineChart(data, svg, xAxisData = null, firstUpdate = false) {
 			.text("Sensor Data Information for SAE Formula Car");*/
 
 	}
+	console.log("b")
+	//document.body.style.cursor = 'auto';
+	//document.documentElement.style.cursor = "auto";
+	//document.body.classList.remove("waiting");
 }
 
 // TODO: add scatterplot support
 function focusChart(data, svg, focus, xAxisData = null) {
-
-	
+	//document.body.classList.add("waiting");
+	//document.body.style.cursor = 'wait';
 
 
 
@@ -877,13 +887,27 @@ function focusChart(data, svg, focus, xAxisData = null) {
 			gb.call(brush.move, defaultSelection);
 		}
 		else {
+			
 			// can even move to brushed(), just probably better performance here?
 			persistentSelection = [xScale.invert(d3.event.selection[0]), xScale.invert(d3.event.selection[1])];
 			
 			// TODO, remove this
 			if (xAxisData != null)
 			{
-				lineChart(data, svg, xAxisData)
+				if (firstUpdate) {
+					lineChart(data, svg, xAxisData);
+				} else {
+					document.documentElement.classList.add("reset-all-cursors")
+					document.documentElement.style.cursor = "progress";
+					
+					setTimeout(() => {
+						lineChart(data, svg, xAxisData);
+						setTimeout(() => {
+							document.documentElement.classList.remove("reset-all-cursors")
+							document.documentElement.style.cursor = "auto";
+						}, 400);
+					}, 1);
+				}
 			}
 		}
 	}
