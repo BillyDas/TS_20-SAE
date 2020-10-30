@@ -228,60 +228,61 @@ function lineChart(data, svg, xAxisData = null, firstUpdate = false) {
 		.attr("width", w)
 		.attr("height", h);
 
-	if (xAxisData != null) {
-		// TODO: this is a terrible TERRIBLE TERRIBLE way of doing it, PLEASE fix
-		data.forEach(function(d) {
-			d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
-		})
+	// console.log(xAxisData);
+	// if (xAxisData != null) {
+	// 	// TODO: this is a terrible TERRIBLE TERRIBLE way of doing it, PLEASE fix
+	// 	data.forEach(function(d) {
+	// 		d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
+	// 	})
 
-		xAxisData.forEach(function(d) {
-			d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
-		})
+	// 	xAxisData.forEach(function(d) {
+	// 		d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
+	// 	})
 
-		let extraData = [];
-		// data.forEach(function(a) {
-		// 	let result = xAxisData.filter(function(b) {
-		// 		return b.UTCTimestamp == a.UTCTimestamp;
-		// 	});
+	// 	let extraData = [];
+	// 	// data.forEach(function(a) {
+	// 	// 	let result = xAxisData.filter(function(b) {
+	// 	// 		return b.UTCTimestamp == a.UTCTimestamp;
+	// 	// 	});
 
-		// 	if (result.length == 0) {
+	// 	// 	if (result.length == 0) {
 				
-		// 	}
-		// })
+	// 	// 	}
+	// 	// })
 
-		let droppedData = 0;
+	// 	let droppedData = 0;
 
-		// god has abandoned us
-		data = data.filter(function(a) {
-			let result = xAxisData.filter(function(b) {
-				return b.UTCTimestamp == a.UTCTimestamp;
-			});
+	// 	// god has abandoned us
+	// 	data = data.filter(function(a) {
+	// 		let result = xAxisData.filter(function(b) {
+	// 			return b.UTCTimestamp == a.UTCTimestamp;
+	// 		});
 
 
-			if (result.length == 0) {
-				droppedData++;
-				return false;
-			} else {
-				a.xAxisVal = result[0].Data;
+	// 		if (result.length == 0) {
+	// 			droppedData++;
+	// 			return false;
+	// 		} else {
+	// 			a.xAxisVal = result[0].Data;
 
-				let dupe;
+	// 			let dupe;
 
-				dupe = Object.assign({}, a);
+	// 			dupe = Object.assign({}, a);
 
-				for (let i = 1; i < result.length; i++) {
-					dupe.xAxisVal = result[1].Data;
-					extraData.push(dupe);
-				}
+	// 			for (let i = 1; i < result.length; i++) {
+	// 				dupe.xAxisVal = result[1].Data;
+	// 				extraData.push(dupe);
+	// 			}
 				
-				return true;
-			}
-		});
+	// 			return true;
+	// 		}
+	// 	});
 
-		//?
-		data.push(...extraData);
+	// 	//?
+	// 	data.push(...extraData);
 
-		//alert("Dropped " + droppedData + " points of data.");
-	}
+	// 	//alert("Dropped " + droppedData + " points of data.");
+	// }
 
 	// group data based on CanId
 	var sumstat = d3.nest()
