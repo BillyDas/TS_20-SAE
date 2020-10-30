@@ -61,7 +61,6 @@ function updateGraph() {
 	var svg = d3.select(chartDiv).select("svg");
 	var focus = d3.select(focusDiv).select("svg");
 
-
 	var xAxisIds = xAxisDataId;
 	
 	if (xAxisIds == "Time") {
@@ -114,9 +113,8 @@ function updateGraph() {
 
 						sensorNameCache[d.CanId] = d.Name + ' (' + d.UnitMetric + ')';
 					})
-					
-					if (xAxisIds != "") {
 
+					if (xAxisIds != "") {
 						var url = hostUrl + ":3000/data?canId=["
 						+ xAxisIds.toString()
 						+ "]&startTime='" + startDateTime
@@ -164,7 +162,7 @@ function updateGraph() {
 						loading.style("display", "none");
 						
 						// draw line chart
-						lineChart(lineData, svg, firstUpdate);
+						lineChart(lineData, svg, null, firstUpdate);
 						focusChart(lineData, svg, focus);
 						
 						if (firstUpdate) {
@@ -198,18 +196,17 @@ function lineChart(data, svg, xAxisData = null, firstUpdate = false) {
 	
 	// linechart is being called twice for some reason
 	// i don't want to talk about it
-	if (firstUpdate) {
-		tempHack++;
-	} else if (tempHack == 1) {
-		tempHack++;
-	} else if (tempHack == 2) {
-		if (xAxisData != null) {
-			console.log("blur");
-		}
-	}
 
-
-
+	// if adding blurring to scatterplot interaction
+	// if (firstUpdate) {
+	// 	tempHack++;
+	// } else if (tempHack == 1) {
+	// 	tempHack++;
+	// } else if (tempHack == 2) {
+	// 	if (xAxisData != null) {
+	// 		// blurring could go here
+	// 	}
+	// }
 
 	let groupedSensors = groupBy(sensorDescCache, "UnitName");
 
@@ -228,61 +225,60 @@ function lineChart(data, svg, xAxisData = null, firstUpdate = false) {
 		.attr("width", w)
 		.attr("height", h);
 
-	// console.log(xAxisData);
-	// if (xAxisData != null) {
-	// 	// TODO: this is a terrible TERRIBLE TERRIBLE way of doing it, PLEASE fix
-	// 	data.forEach(function(d) {
-	// 		d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
-	// 	})
+	if (xAxisData != null) {
+		// TODO: this is a terrible TERRIBLE TERRIBLE way of doing it, PLEASE fix
+		data.forEach(function(d) {
+			d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
+		})
 
-	// 	xAxisData.forEach(function(d) {
-	// 		d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
-	// 	})
+		xAxisData.forEach(function(d) {
+			d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
+		})
 
-	// 	let extraData = [];
-	// 	// data.forEach(function(a) {
-	// 	// 	let result = xAxisData.filter(function(b) {
-	// 	// 		return b.UTCTimestamp == a.UTCTimestamp;
-	// 	// 	});
+		let extraData = [];
+		// data.forEach(function(a) {
+		// 	let result = xAxisData.filter(function(b) {
+		// 		return b.UTCTimestamp == a.UTCTimestamp;
+		// 	});
 
-	// 	// 	if (result.length == 0) {
+		// 	if (result.length == 0) {
 				
-	// 	// 	}
-	// 	// })
+		// 	}
+		// })
 
-	// 	let droppedData = 0;
+		let droppedData = 0;
 
-	// 	// god has abandoned us
-	// 	data = data.filter(function(a) {
-	// 		let result = xAxisData.filter(function(b) {
-	// 			return b.UTCTimestamp == a.UTCTimestamp;
-	// 		});
+		// god has abandoned us
+		data = data.filter(function(a) {
+			let result = xAxisData.filter(function(b) {
+				return b.UTCTimestamp == a.UTCTimestamp;
+			});
 
 
-	// 		if (result.length == 0) {
-	// 			droppedData++;
-	// 			return false;
-	// 		} else {
-	// 			a.xAxisVal = result[0].Data;
+			if (result.length == 0) {
+				droppedData++;
+				return false;
+			} else {
+				a.xAxisVal = result[0].Data;
 
-	// 			let dupe;
+				let dupe;
 
-	// 			dupe = Object.assign({}, a);
+				dupe = Object.assign({}, a);
 
-	// 			for (let i = 1; i < result.length; i++) {
-	// 				dupe.xAxisVal = result[1].Data;
-	// 				extraData.push(dupe);
-	// 			}
+				for (let i = 1; i < result.length; i++) {
+					dupe.xAxisVal = result[1].Data;
+					extraData.push(dupe);
+				}
 				
-	// 			return true;
-	// 		}
-	// 	});
+				return true;
+			}
+		});
 
-	// 	//?
-	// 	data.push(...extraData);
+		//?
+		data.push(...extraData);
 
-	// 	//alert("Dropped " + droppedData + " points of data.");
-	// }
+		//alert("Dropped " + droppedData + " points of data.");
+	}
 
 	// group data based on CanId
 	var sumstat = d3.nest()
@@ -576,8 +572,6 @@ function focusChart(data, svg, focus, xAxisData = null) {
 			data.forEach(function(d) {
 				d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
 			});
-	
-			console.log(xAxisData);
 
 			xAxisData.forEach(function(d) {
 				d.UTCTimestamp = Math.round(d.UTCTimestamp / 500) * 500;
