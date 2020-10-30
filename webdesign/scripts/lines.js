@@ -211,8 +211,6 @@ function lineChart(data, svg, xAxisData = null, firstUpdate = false) {
 	//document.getElementsByTagName( 'html' )[0].classList.add("reset-all-cursors")
 	//document.body.style.cursor = 'wait';
 	//document.body.classList.add("waiting");
-	
-	console.log("a")
 
 	let groupedSensors = groupBy(sensorDescCache, "UnitName");
 
@@ -527,7 +525,6 @@ function lineChart(data, svg, xAxisData = null, firstUpdate = false) {
 			.text("Sensor Data Information for SAE Formula Car");*/
 
 	}
-	console.log("b")
 	//document.body.style.cursor = 'auto';
 	//document.documentElement.style.cursor = "auto";
 	//document.body.classList.remove("waiting");
