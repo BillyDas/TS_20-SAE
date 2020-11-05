@@ -68,6 +68,7 @@ function initSettings() {
         $('#dataTimingRange').parent().addClass("btn btn-primary active");
         $('#settingsTimingRange').show();
         $('#settingsTimingLive').hide();
+        $('#xAxisSelectPicker').next().prop("disabled", false);
         timeRangeLiveMode = false;
     });
 
@@ -80,6 +81,10 @@ function initSettings() {
         $('#settingsTimingLive').show();
         $('#settingsTimingRange').val("off");
         $('#settingsTimingLive').val("on");
+        $('#xAxisSelectPicker').val("Time");
+        xAxisDataId = $('#xAxisSelectPicker').val();
+        $('#xAxisSelectPicker').next().prop("disabled", true);
+        $('#xAxisSelectPicker').next().find(".filter-option-inner-inner").html("Time");
         timeRangeLiveMode = true;
     });
 
