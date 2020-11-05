@@ -15,25 +15,31 @@
     <div id="main">
         <div id="alert"></div>
         <h1>Custom Visualisation</h1>
+		
 
 
         <hr/>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#settingsModal">
-            <i class="fa fa-cog"></i> Settings
-        </button>
+		
+		<div>
+			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#settingsModal">
+				<i class="fa fa-cog"></i> Settings
+			</button>
 
-        <div id="graph">
-			<div id="loadingGraph" style="display:none;">
-				Run Billy, run!
-				<br/>
-				<img src="https://cdn.discordapp.com/attachments/691821735124795448/761133806655635476/RUNBILLYRUN.gif" />
-				<br/>
-				Loading...
+			<div class="overlay"></div>
+			<div id="graph">
+				<div id="loadingGraph" style="display:none;">
+					Run Billy, run!
+					<br/>
+					<img src="https://cdn.discordapp.com/attachments/691821735124795448/761133806655635476/RUNBILLYRUN.gif" />
+					<br/>
+					Loading...
+				</div>
+				<div id="chart"></div>
+				<div id="focus"></div>
+				<script src="scripts/lines.js"></script>
 			</div>
-            <div id="chart"></div>
-            <div id="focus"></div>
-            <script src="scripts/lines.js"></script>
-        </div>
+			<span id="overlay"></span>
+		</div>
     </div>
 </body>
 </html>

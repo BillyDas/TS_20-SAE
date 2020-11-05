@@ -1,0 +1,80 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+}
+
+#navbar {
+    width: 15%;
+    background-color: rgb(56, 56, 56);
+    color: rgb(217,217,217);
+    height: 100%;
+    float: left;
+    position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+}
+
+#navbar a {
+    display: block;
+    padding: 0.5em;
+    font-size: 1em;
+    margin: 0.5em;
+    text-decoration: none;
+    color: rgb(217,217,217);
+    border: 1px solid transparent;
+    height: 1.5em;
+    line-height: 1.5;
+}
+
+#navbar a:hover, #navbar #selected {
+    background-color: rgb(102,102,102);
+    border: 1px solid black;
+    border-radius: 3px;
+}
+
+#navbar p {
+    margin: 0;
+    padding: 0.5em;
+}
+
+#inlinespan {
+    display: inline-block;
+    position: relative;
+        bottom: 0.3em;
+}
+
+#navbar img {
+    height: 1.5em;
+    width: 1.5em;
+    margin: 0;
+    margin-right: 0.5em;
+}
+
+#navbar p.category {
+	padding: 0 0 0 0.5em;
+}
+
+#main {
+    margin-left: 17%;
+}
+
+#main h1 {
+    font-weight: lighter;
+}
+
+/*useless, delete when done*/
+#main img {
+    width: 80%;
+    height:40em;
+}
+
+fieldset {
+    width: 30%;
+    box-sizing: border-box;
+    float: left;
+}
+
+#button {
+    margin-top: 8px;
+}
