@@ -1,4 +1,3 @@
-
 var defLiveDataNum = 6;
 //var defStartDateTime = moment(defEndDateTime - (24 * 3600 * 1000));
 //var defEndDateTime = moment();
@@ -124,8 +123,18 @@ function controlUpdate() {
 		
 		persistentSelection = null;
 		minX = null;
-		maxX = null;
-        updateGraph();
+        maxX = null;
+        
+        firstUpdate = true;
+        if (timeRangeLiveMode) {
+            updateGraph(3000)
+            //interval = setInterval(updateGraph, 3000);
+        }
+        else {
+            //if (typeof interval !== 'undefined')
+            //    clearInterval(interval);
+            updateGraph();
+        }
     }
     else {
         $('#chart svg').empty();

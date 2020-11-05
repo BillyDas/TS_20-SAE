@@ -1,3 +1,9 @@
+var mostRecentDateTime;
+var liveDataCache = [];
+
+
+var interval;
+
 var loading;
 var persistentSelection = null;
 var sensorNameCache = {}; // might be redundant now that i'm storing it all
@@ -21,10 +27,10 @@ var dynamicPaddingLeft;
 
 var tempHack = 0;
 
-var hostUrl = window.location.origin;
-if (hostUrl == null){
-	var hostUrl = "http://ts20.billydasdev.com";
-}
+//var hostUrl = window.location.origin;
+//if (hostUrl == null){
+    var hostUrl = "http://ts20.billydasdev.com";
+//
 
 
 function initLines() {
@@ -36,7 +42,12 @@ function initLines() {
 	updateGraph();
 }
 
-function updateGraph() {
+function updateGraph(liveUpdateTimer = null) {
+	clearInterval(interval);
+	liveDataCache = [];
+
+
+
 	tempHack = 0;
 	// TODO: these are subject to change, but are temporary and needed for loading img
 
@@ -60,36 +71,51 @@ function updateGraph() {
 	var svg = d3.select(chartDiv).select("svg");
 	var focus = d3.select(focusDiv).select("svg");
 
-	var xAxisIds = xAxisDataId;
-	
-	if (xAxisIds == "Time") {
-		xAxisIds = "";
-	}
 
-	// list of sensors available
-	var yAxisIds = yAxisDataId;
 
-	// format strings for use in GET request
-	for (var i = 0; i < yAxisIds.length; i++) {
-		if (!yAxisIds[i].includes('"')){
-			yAxisIds[i] = '"' + yAxisIds[i] + '"';
+	function fetchAllData() {
+		if (!firstUpdate) {
+			console.log("subsequent update");
+			//mostRecentDateTime is the most recent date from the existing contents of lineData.
+			startDateTime = mostRecentDateTime;
+			//moment() is right now
+			endDateTime = moment().format("YYYY-MM-DDTHH:mm:ss.SSSS");
+		} else {
+			console.log("first lol")
 		}
-	}
 
-	if (xAxisIds != "")
-	{
-		xAxisIds = '"' + xAxisIds + '"';
-	}
+
+		console.log(firstUpdate)
+		var xAxisIds = xAxisDataId;
 	
+		if (xAxisIds == "Time") {
+			xAxisIds = "";
+		}
+	
+		// list of sensors available
+		var yAxisIds = yAxisDataId;
+	
+		// format strings for use in GET request
+		for (var i = 0; i < yAxisIds.length; i++) {
+			if (!yAxisIds[i].includes('"')){
+				yAxisIds[i] = '"' + yAxisIds[i] + '"';
+			}
+		}
+	
+		if (xAxisIds != "")
+		{
+			xAxisIds = '"' + xAxisIds + '"';
+		}
+		
+	
+		var url = hostUrl + ":3000/data?canId=["
+			+ yAxisIds.toString()
+			+ "]&startTime='" + startDateTime
+			+ "'&endTime='" + endDateTime + "'"
+			+ "&max=200000";
 
-	var url = hostUrl + ":3000/data?canId=["
-		+ yAxisIds.toString()
-		+ "]&startTime='" + startDateTime
-		+ "'&endTime='" + endDateTime + "'"
-		+ "&max=200000";
-
-	// load the dataset and then draw
-	fetch(url)
+		// load the dataset and then draw
+		fetch(url)
 		.then(response => response.json())
 		.then(lineData => {
 			// data conversion for time and data
@@ -97,6 +123,20 @@ function updateGraph() {
 				d.UTCTimestamp = Date.parse(d.UTCTimestamp);
 				d.Data = parseFloat(d.Data);
 			})
+
+			if (liveUpdateTimer != null) {
+				liveDataCache = liveDataCache.concat(lineData)
+				liveDataCache = liveDataCache.sort(function(a,b){
+					return b.UTCTimestamp -  a.UTCTimestamp;
+				});
+
+				//stores most recent date from linedata for live updating
+				let newDate = new Date(Math.max.apply(null, lineData.map(function(e) {
+					return new Date(e.UTCTimestamp);
+					})))
+				newDate.setMilliseconds(newDate.getMilliseconds() + 1); //add 1 ms to prevent the old data from getting picked up again
+				mostRecentDateTime = moment(newDate).utc().format("YYYY-MM-DDTHH:mm:ss.SSSS");
+			}		
 
 			let xAxisData = null;
 			url = hostUrl + ":3000/desc?canId=[" + yAxisIds.toString() + "]"
@@ -141,36 +181,72 @@ function updateGraph() {
 										// hide loading graphic
 										loading.style("display", "none");
 										
-										// draw line chart
-										lineChart(lineData, svg, xAxisData, firstUpdate);
-										focusChart(lineData, svg, focus, xAxisData);
-										
-										if (firstUpdate) {
-											// add listener to draw on resize
-											window.addEventListener("resize", function () {
-												lineChart(lineData, svg, xAxisData);
-												focusChart(lineData, svg, focus, xAxisData);
-											});
-											firstUpdate = false;
+										if (!liveDataCache.length) {
+											// draw line chart
+											lineChart(lineData, svg, xAxisData, firstUpdate);
+											focusChart(lineData, svg, focus, xAxisData);
+
+											if (firstUpdate) {
+												// add listener to draw on resize
+												window.addEventListener("resize", function () {
+													lineChart(lineData, svg, xAxisData);
+													focusChart(lineData, svg, focus, xAxisData);
+												});
+												firstUpdate = false;
+											}
+										} else {
+											// draw line chart
+											lineChart(liveDataCache, svg, xAxisData, firstUpdate);
+											focusChart(liveDataCache, svg, focus, xAxisData);
+
+											if (firstUpdate) {
+												// add listener to draw on resize
+												window.addEventListener("resize", function () {
+													lineChart(liveDataCache, svg, xAxisData);
+													focusChart(liveDataCache, svg, focus, xAxisData);
+												});
+												firstUpdate = false;
+											}
 										}
+										
 									})
 							});
 
 					} else {
+						console.log(lineData)
+						console.log(liveDataCache)
+
 						// hide loading graphic
 						loading.style("display", "none");
 						
-						// draw line chart
-						lineChart(lineData, svg, null, firstUpdate);
-						focusChart(lineData, svg, focus);
-						
-						if (firstUpdate) {
-							// add listener to draw on resize
-							window.addEventListener("resize", function () {
-								lineChart(lineData, svg);
-								focusChart(lineData, svg, focus);
-							});
-							firstUpdate = false;
+						if (!liveDataCache.length) {
+							console.log("live cache empty")
+							// draw line chart
+							lineChart(lineData, svg, null, firstUpdate);
+							focusChart(lineData, svg, focus);
+							
+							if (firstUpdate) {
+								// add listener to draw on resize
+								window.addEventListener("resize", function () {
+									lineChart(lineData, svg);
+									focusChart(lineData, svg, focus);
+								});
+								firstUpdate = false;
+							}
+						} else {
+							console.log("full fella")
+							// draw line chart
+							lineChart(liveDataCache, svg, null, firstUpdate);
+							focusChart(liveDataCache, svg, focus);
+							
+							if (firstUpdate) {
+								// add listener to draw on resize
+								window.addEventListener("resize", function () {
+									lineChart(liveDataCache, svg);
+									focusChart(liveDataCache, svg, focus);
+								});
+								firstUpdate = false;
+							}
 						}
 					}
 
@@ -185,6 +261,18 @@ function updateGraph() {
 			// log the caught error if failure to load database
 			console.log(error);
 		});
+	}
+
+	fetchAllData();
+	if (liveUpdateTimer != null) {
+		interval = setInterval(() => {
+			persistentSelection = null;
+			minX = null;
+			maxX = null;
+			fetchAllData();
+		}, liveUpdateTimer)
+	}
+	
 }
 
 function lineChart(data, svg, xAxisData = null, firstUpdate = false) {
