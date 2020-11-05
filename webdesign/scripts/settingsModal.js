@@ -110,10 +110,6 @@ function initSettings() {
     $('#liveRange').change(function () {
         updateBacklogData();
     });
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 
     $('#settingsModal').on('hidden.bs.modal', function (e) {
         controlUpdate();
