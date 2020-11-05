@@ -4,6 +4,7 @@
 <head>
     <title>SAE Data App</title>
     <?php require "inc/head.html" ?>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <script src="scripts/alert.js"></script>
     <?php require "func/fnSensorsList.php" ?>
 </head>
@@ -14,11 +15,13 @@
     <div id="main">
         <div id="alert"></div>
         <h1>Custom Visualisation</h1>
+
+
         <hr/>
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#settingsModal">
             <i class="fa fa-cog"></i> Settings
         </button>
-        
+
         <div id="graph">
 			<div id="loadingGraph" style="display:none;">
 				Run Billy, run!

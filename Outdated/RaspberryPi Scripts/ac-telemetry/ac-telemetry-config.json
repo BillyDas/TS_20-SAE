@@ -1,0 +1,144 @@
+{
+    "sensors": [
+        {
+            "name": "speedKmh",
+            "offset": 2,
+            "numVals": 1
+        },
+        {
+            "name": "speedMph",
+            "offset": 3,
+            "numVals": 1
+        },
+        {
+            "name": "speedMs",
+            "offset": 4,
+            "numVals": 1
+        },
+        {
+            "name": "accG_vertical",
+            "offset": 7,
+            "numVals": 1
+        },
+        {
+            "name": "accG_horizontal",
+            "offset": 8,
+            "numVals": 1
+        },
+        {
+            "name": "accG_frontal",
+            "offset": 9,
+            "numVals": 1
+        },
+        {
+            "name": "gas",
+            "offset": 14,
+            "numVals": 1
+        },
+        {
+            "name": "brake",
+            "offset": 15,
+            "numVals": 1
+        },
+        {
+            "name": "clutch",
+            "offset": 16,
+            "numVals": 1
+        },
+        {
+            "name": "steer",
+            "offset": 18,
+            "numVals": 1
+        },
+        {
+            "name": "engineRPM",
+            "offset": 17,
+            "numVals": 1
+        },
+        {
+            "name": "cgHeight",
+            "offset": 20,
+            "numVals": 1
+        },
+        {
+            "name": "wheelAngularSpeed",
+            "offset": 21,
+            "numVals": 4
+        },
+        {
+            "name": "slipAngle",
+            "offset": 25,
+            "numVals": 4
+        },
+        {
+            "name": "slipAngle_ContactPitch",
+            "offset": 29,
+            "numVals": 4
+        },
+        {
+            "name": "slipRatio",
+            "offset": 33,
+            "numVals": 4
+        },
+        {
+            "name": "tyreSlip",
+            "offset": 37,
+            "numVals": 4
+        },
+        {
+            "name": "ndSlip",
+            "offset": 41,
+            "numVals": 4
+        },
+        {
+            "name": "tyreSlip",
+            "offset": 37,
+            "numVals": 4
+        },
+        {
+            "name": "ndSlip",
+            "offset": 41,
+            "numVals": 4
+        },
+        {
+            "name": "load",
+            "offset": 45,
+            "numVals": 4
+        },
+        {
+            "name": "Dy",
+            "offset": 49,
+            "numVals": 4
+        },
+        {
+            "name": "Mz",
+            "offset": 53,
+            "numVals": 4
+        },
+        {
+            "name": "camberRAD",
+            "offset": 61,
+            "numVals": 4
+        },
+        {
+            "name": "tyreRadius",
+            "offset": 65,
+            "numVals": 4
+        },
+        {
+            "name": "tyreLoadRadius",
+            "offset": 69,
+            "numVals": 4
+        },
+        {
+            "name": "suspensionHeight",
+            "offset": 73,
+            "numVals": 4
+        },
+        {
+            "name": "carCoordinates",
+            "offset": 79,
+            "numVals": 3
+        }
+    ]
+}

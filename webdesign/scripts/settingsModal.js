@@ -46,7 +46,7 @@ function initSettings() {
 
     //Setup Event Listeners
     $('#xAxisSelectPicker').on('changed.bs.select', function () {
-       xAxisDataId = $('#xAxisSelectPicker').val();
+        xAxisDataId = $('#xAxisSelectPicker').val();
     });
 
     $('#yAxisSelectPicker').on('changed.bs.select', function () {
@@ -110,7 +110,10 @@ function initSettings() {
     $('#liveRange').change(function () {
         updateBacklogData();
     });
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 
     $('#settingsModal').on('hidden.bs.modal', function (e) {
         controlUpdate();
@@ -144,6 +147,13 @@ function controlUpdate() {
         $('#focus svg').empty();
     }
 }
+
+function updateBacklogData() {
+    var backlogVal = $('#liveNum').val();
+    var backlogRange = $('#liveRange').val();
+    backlogDataRange = backlogVal * backlogRange;
+}
+
 
 // run init on window load
 $(document).ready(function () {

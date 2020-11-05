@@ -1,3 +1,8 @@
+var hostUrl = window.location.origin;
+if (hostUrl == null){
+	hostUrl = "http://ts20.billydasdev.com";
+}
+
 function loadData() {
     // list of sensors available
     var sensorIds = [
@@ -23,7 +28,7 @@ function loadData() {
     var startTime = "2020-08-23T16:51:05.970327Z";
     var endTime = "2020-08-23T16:55:28.525013Z";
 
-    var url = "http://ts20.billydasdev.com:3000/data?canId=[" 
+    var url = hostUrl + ":3000/data?canId=[" 
     + sensorIds.toString() 
     + "]&startTime='" + startTime 
     + "'&endTime='" + endTime + "'"
