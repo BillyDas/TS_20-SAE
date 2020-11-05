@@ -1,3 +1,5 @@
+//var color;
+
 var mostRecentDateTime;
 var liveDataCache = [];
 
@@ -43,6 +45,11 @@ function initLines() {
 }
 
 function updateGraph(liveUpdateTimer = null) {
+	//color = null;
+	persistentSelection = null;
+	minX = null;
+	maxX = null;
+
 	clearInterval(interval);
 	liveDataCache = [];
 
@@ -125,10 +132,9 @@ function updateGraph(liveUpdateTimer = null) {
 			})
 
 			if (liveUpdateTimer != null) {
-				liveDataCache = liveDataCache.concat(lineData)
-				liveDataCache = liveDataCache.sort(function(a,b){
-					return b.UTCTimestamp -  a.UTCTimestamp;
-				});
+				
+				liveDataCache = lineData.concat(liveDataCache)
+				console.log(liveDataCache)
 
 				//stores most recent date from linedata for live updating
 				let newDate = new Date(Math.max.apply(null, lineData.map(function(e) {
@@ -476,11 +482,14 @@ function lineChart(data, svg, xAxisData = null, firstUpdate = false) {
 
 	// create group names
 	var sensorNames = sumstat.map(function (d) { return d.key })
+	sensorNames.sort().reverse()
 
 	// create scale to map sensors to individual colour
-	var color = d3.scaleOrdinal()
-		.domain(sensorNames)
-		.range(d3.schemeCategory10);
+	//if (color == null) {
+		var color = d3.scaleOrdinal()
+			.domain(sensorNames)
+			.range(d3.schemeCategory10);
+	//}
 
 	// sorry
 	let yAxisPadder = 0;
@@ -842,11 +851,14 @@ function focusChart(data, svg, focus, xAxisData = null) {
 
 		// create group names
 		var sensorNames = sumstat.map(function (d) { return d.key })
+		sensorNames.sort().reverse()
 
 		// create scale to map sensors to individual colour
-		var color = d3.scaleOrdinal()
-			.domain(sensorNames)
-			.range(d3.schemeCategory10);
+		//if (color == null) {
+			var color = d3.scaleOrdinal()
+				.domain(sensorNames)
+				.range(d3.schemeCategory10);
+		//}
 
 		const brush = d3.brushX()
 			//.extent([[dynamicPaddingLeft, 0.5], [w - padding, focusHeight + 0.5]])
