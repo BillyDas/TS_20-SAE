@@ -17,8 +17,11 @@ var focusDiv = document.getElementById("focus");
 var padding = 100;
 var firstUpdate = true;
 
-var startDateTime = moment("2020-08-23T16:50:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');;
-var endDateTime = moment("2020-08-23T16:55:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');;
+var backupStart = moment("2020-08-23T16:50:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');
+var backupEnd = moment("2020-08-23T16:55:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');
+
+var startDateTime = moment("2020-08-23T16:50:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');
+var endDateTime = moment("2020-08-23T16:55:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');
 
 var minX, maxX, minY, maxY = null;
 
@@ -46,9 +49,10 @@ function initLines() {
 
 function updateGraph(liveUpdateTimer = null) {
 	//color = null;
-	persistentSelection = null;
-	minX = null;
-	maxX = null;
+	// persistentSelection = null;
+	// minX = null;
+	// maxX = null;
+	//mostRecentDateTime = backupStart;
 
 	clearInterval(interval);
 	liveDataCache = [];
@@ -89,6 +93,8 @@ function updateGraph(liveUpdateTimer = null) {
 			endDateTime = moment().format("YYYY-MM-DDTHH:mm:ss.SSSS");
 		} else {
 			console.log("first lol")
+			startDateTime = backupStart;
+			endDateTime = backupEnd;
 		}
 
 
@@ -133,6 +139,9 @@ function updateGraph(liveUpdateTimer = null) {
 
 			if (liveUpdateTimer != null) {
 				
+				console.log("gona kms")
+				console.log(url)
+				console.log(lineData)
 				liveDataCache = lineData.concat(liveDataCache)
 				console.log(liveDataCache)
 
@@ -272,7 +281,7 @@ function updateGraph(liveUpdateTimer = null) {
 	fetchAllData();
 	if (liveUpdateTimer != null) {
 		interval = setInterval(() => {
-			persistentSelection = null;
+			// persistentSelection = null;
 			minX = null;
 			maxX = null;
 			fetchAllData();
@@ -859,15 +868,33 @@ function focusChart(data, svg, focus, xAxisData = null) {
 				.domain(sensorNames)
 				.range(d3.schemeCategory10);
 		//}
+		
+		console.log(d3.select('#focus'))
+		console.log(d3.select('#focus').select('svg'))
+		console.log(d3.select('#focus').select('svg').select('g'));
+
+		console.log("asdasd")
+		console.log(d3.select('#focus').select('.domain').node())
+		console.log("vs")
+		console.log(d3.select('.domain').node())
 
 		const brush = d3.brushX()
 			//.extent([[dynamicPaddingLeft, 0.5], [w - padding, focusHeight + 0.5]])
 			
-			.extent([[dynamicPaddingLeft, 0.5], [dynamicPaddingLeft + d3.select('.domain').node().getBoundingClientRect().width, focusHeight + 0.5]])
+			.extent([[dynamicPaddingLeft, 0.5], 
+				[
+					
+					dynamicPaddingLeft + 
+					d3.select('#chartClip').node().getBoundingClientRect().width, 
+
+					//d3.select('.domain').node().getBoundingClientRect().width
+					focusHeight + 0.5]
+			])
 			.on("brush", brushed)
 			.on("end", brushended);
 
 		const defaultSelection = [xScale.range()[0], xScale.range()[1]];
+		console.log(defaultSelection);
 
 		focus.append("g")
 			.attr("transform", "translate(0, " + (focusHeight + 1) + ")")
@@ -953,10 +980,15 @@ function focusChart(data, svg, focus, xAxisData = null) {
 		const gb = focus.append("g")
 			.call(brush)
 
-		if (persistentSelection === null) {
+		if (persistentSelection == null) {
 			gb.call(brush.move, defaultSelection);
 		} else {
-			gb.call(brush.move, [xScale(persistentSelection[0]), xScale(persistentSelection[1])])
+			if (!liveDataCache.length) {
+				gb.call(brush.move, [xScale(persistentSelection[0]), xScale(persistentSelection[1])])
+			} else {
+				gb.call(brush.move, [xScale(persistentSelection[0]), defaultSelection[1]])
+			}
+			
 		}
 
 	function brushed() {
@@ -1007,6 +1039,17 @@ function focusChart(data, svg, focus, xAxisData = null) {
 				}
 			}
 		}
+	}
+
+	if (liveDataCache.length) {
+		console.log("hwoop")
+		var b = focus.select('.brush');
+		b.selectAll('.resize').remove();
+		b.selectAll('.background').remove();
+		//brush.event(b);
+	} else {
+		console.log("moving brush to default")
+		gb.call(brush.move, defaultSelection);
 	}
 }
 

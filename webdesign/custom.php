@@ -36,6 +36,12 @@
 				</div>
 				<div id="chart"></div>
 				<div id="focus"></div>
+				<!-- <div id="liveToggles">
+					<button type="button" class="btn btn-danger">Lock Left Handle</button>
+					<button type="button" class="btn btn-success">Unlock Left Handle</button>
+					<button type="button" class="btn btn-danger">Lock Right Handle</button>
+					<button type="button" class="btn btn-success">Unlock Right Handle</button>
+				</div> -->
 				<script src="scripts/lines.js"></script>
 			</div>
 			<span id="overlay"></span>
