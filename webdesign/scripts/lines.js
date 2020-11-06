@@ -1,4 +1,4 @@
-//var color;
+var rightLocked = false;
 
 var mostRecentDateTime;
 var liveDataCache = [];
@@ -17,11 +17,14 @@ var focusDiv = document.getElementById("focus");
 var padding = 100;
 var firstUpdate = true;
 
-var backupStart = moment("2020-08-23T16:50:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');
-var backupEnd = moment("2020-08-23T16:55:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');
+var backupStart;
+var backupEnd;
 
-var startDateTime = moment("2020-08-23T16:50:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');
-var endDateTime = moment("2020-08-23T16:55:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');
+var startDateTime; //= moment("2020-08-23T16:50:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');
+var endDateTime; //= moment("2020-08-23T16:55:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');
+
+var chStartDateTime;
+var chEndDateTime;
 
 var minX, maxX, minY, maxY = null;
 
@@ -32,10 +35,10 @@ var dynamicPaddingLeft;
 
 var tempHack = 0;
 
-//var hostUrl = window.location.origin;
-//if (hostUrl == null){
+var hostUrl = window.location.origin;
+if (hostUrl == null){
     var hostUrl = "http://ts20.billydasdev.com";
-//
+}
 
 
 function initLines() {
@@ -53,6 +56,11 @@ function updateGraph(liveUpdateTimer = null) {
 	// minX = null;
 	// maxX = null;
 	//mostRecentDateTime = backupStart;
+
+	//backupStart = startDateTime;
+	//backupEnd = endDateTime;
+
+
 
 	clearInterval(interval);
 	liveDataCache = [];
@@ -86,19 +94,18 @@ function updateGraph(liveUpdateTimer = null) {
 
 	function fetchAllData() {
 		if (!firstUpdate) {
-			console.log("subsequent update");
 			//mostRecentDateTime is the most recent date from the existing contents of lineData.
-			startDateTime = mostRecentDateTime;
+			chStartDateTime = mostRecentDateTime;
 			//moment() is right now
-			endDateTime = moment().format("YYYY-MM-DDTHH:mm:ss.SSSS");
+			chEndDateTime = moment().format("YYYY-MM-DDTHH:mm:ss.SSSS");
 		} else {
-			console.log("first lol")
-			startDateTime = backupStart;
-			endDateTime = backupEnd;
+			chStartDateTime = startDateTime
+			chEndDateTime = endDateTime
+
+			//startDateTime = backupStart;
+			//endDateTime = backupEnd;
 		}
 
-
-		console.log(firstUpdate)
 		var xAxisIds = xAxisDataId;
 	
 		if (xAxisIds == "Time") {
@@ -123,8 +130,8 @@ function updateGraph(liveUpdateTimer = null) {
 	
 		var url = hostUrl + ":3000/data?canId=["
 			+ yAxisIds.toString()
-			+ "]&startTime='" + startDateTime
-			+ "'&endTime='" + endDateTime + "'"
+			+ "]&startTime='" + chStartDateTime
+			+ "'&endTime='" + chEndDateTime + "'"
 			+ "&max=200000";
 
 		// load the dataset and then draw
@@ -139,11 +146,7 @@ function updateGraph(liveUpdateTimer = null) {
 
 			if (liveUpdateTimer != null) {
 				
-				console.log("gona kms")
-				console.log(url)
-				console.log(lineData)
 				liveDataCache = lineData.concat(liveDataCache)
-				console.log(liveDataCache)
 
 				//stores most recent date from linedata for live updating
 				let newDate = new Date(Math.max.apply(null, lineData.map(function(e) {
@@ -171,8 +174,8 @@ function updateGraph(liveUpdateTimer = null) {
 					if (xAxisIds != "") {
 						var url = hostUrl + ":3000/data?canId=["
 						+ xAxisIds.toString()
-						+ "]&startTime='" + startDateTime
-						+ "'&endTime='" + endDateTime + "'"
+						+ "]&startTime='" + chStartDateTime
+						+ "'&endTime='" + chEndDateTime + "'"
 						+ "&max=200000";
 
 						fetch(url)
@@ -228,14 +231,10 @@ function updateGraph(liveUpdateTimer = null) {
 							});
 
 					} else {
-						console.log(lineData)
-						console.log(liveDataCache)
-
 						// hide loading graphic
 						loading.style("display", "none");
 						
 						if (!liveDataCache.length) {
-							console.log("live cache empty")
 							// draw line chart
 							lineChart(lineData, svg, null, firstUpdate);
 							focusChart(lineData, svg, focus);
@@ -249,7 +248,6 @@ function updateGraph(liveUpdateTimer = null) {
 								firstUpdate = false;
 							}
 						} else {
-							console.log("full fella")
 							// draw line chart
 							lineChart(liveDataCache, svg, null, firstUpdate);
 							focusChart(liveDataCache, svg, focus);
@@ -280,12 +278,16 @@ function updateGraph(liveUpdateTimer = null) {
 
 	fetchAllData();
 	if (liveUpdateTimer != null) {
+		$("#liveToggles").css("display", "block");
+
 		interval = setInterval(() => {
 			// persistentSelection = null;
 			minX = null;
 			maxX = null;
 			fetchAllData();
 		}, liveUpdateTimer)
+	} else {
+		$("#liveToggles").css("display", "none");
 	}
 	
 }
@@ -868,15 +870,6 @@ function focusChart(data, svg, focus, xAxisData = null) {
 				.domain(sensorNames)
 				.range(d3.schemeCategory10);
 		//}
-		
-		console.log(d3.select('#focus'))
-		console.log(d3.select('#focus').select('svg'))
-		console.log(d3.select('#focus').select('svg').select('g'));
-
-		console.log("asdasd")
-		console.log(d3.select('#focus').select('.domain').node())
-		console.log("vs")
-		console.log(d3.select('.domain').node())
 
 		const brush = d3.brushX()
 			//.extent([[dynamicPaddingLeft, 0.5], [w - padding, focusHeight + 0.5]])
@@ -894,7 +887,6 @@ function focusChart(data, svg, focus, xAxisData = null) {
 			.on("end", brushended);
 
 		const defaultSelection = [xScale.range()[0], xScale.range()[1]];
-		console.log(defaultSelection);
 
 		focus.append("g")
 			.attr("transform", "translate(0, " + (focusHeight + 1) + ")")
@@ -983,7 +975,7 @@ function focusChart(data, svg, focus, xAxisData = null) {
 		if (persistentSelection == null) {
 			gb.call(brush.move, defaultSelection);
 		} else {
-			if (!liveDataCache.length) {
+			if (!liveDataCache.length || !rightLocked) {
 				gb.call(brush.move, [xScale(persistentSelection[0]), xScale(persistentSelection[1])])
 			} else {
 				gb.call(brush.move, [xScale(persistentSelection[0]), defaultSelection[1]])
@@ -1042,18 +1034,28 @@ function focusChart(data, svg, focus, xAxisData = null) {
 	}
 
 	if (liveDataCache.length) {
-		console.log("hwoop")
 		var b = focus.select('.brush');
 		b.selectAll('.resize').remove();
 		b.selectAll('.background').remove();
 		//brush.event(b);
 	} else {
-		console.log("moving brush to default")
 		gb.call(brush.move, defaultSelection);
 	}
 }
 
 // run init on window load
 $(document).ready(function () {
+	$("#btnLockR").click(() => {
+		$("#btnLockR").css("display", "none");
+		$("#btnUnlockR").css("display", "block");
+		rightLocked = true;
+	})
+
+	$("#btnUnlockR").click(() => {
+		$("#btnUnlockR").css("display", "none");
+		$("#btnLockR").css("display", "block");
+		rightLocked = false;
+	})
+
 	initLines();
 });

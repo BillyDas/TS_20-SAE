@@ -36,12 +36,10 @@
 				</div>
 				<div id="chart"></div>
 				<div id="focus"></div>
-				<!-- <div id="liveToggles">
-					<button type="button" class="btn btn-danger">Lock Left Handle</button>
-					<button type="button" class="btn btn-success">Unlock Left Handle</button>
-					<button type="button" class="btn btn-danger">Lock Right Handle</button>
-					<button type="button" class="btn btn-success">Unlock Right Handle</button>
-				</div> -->
+				<div id="liveToggles" style="margin-top:4em;display:none;">
+					<button id="btnLockR" type="button" class="btn btn-danger">Lock Right Handle to Live Data</button>
+					<button id="btnUnlockR" type="button" class="btn btn-success" style="display:none;">Unlock Right Handle from Live Data</button>
+				</div>
 				<script src="scripts/lines.js"></script>
 			</div>
 			<span id="overlay"></span>
