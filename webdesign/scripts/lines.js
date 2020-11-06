@@ -1,3 +1,11 @@
+var rightLocked = false;
+
+var mostRecentDateTime;
+var liveDataCache = [];
+
+
+var interval;
+
 var loading;
 var persistentSelection = null;
 var sensorNameCache = {}; // might be redundant now that i'm storing it all
@@ -9,8 +17,14 @@ var focusDiv = document.getElementById("focus");
 var padding = 100;
 var firstUpdate = true;
 
-var startDateTime = moment("2020-08-23T16:50:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');;
-var endDateTime = moment("2020-08-23T16:55:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');;
+var backupStart;
+var backupEnd;
+
+var startDateTime; //= moment("2020-08-23T16:50:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');
+var endDateTime; //= moment("2020-08-23T16:55:05.970327").format('YYYY-MM-DDTHH:mm:ss.SSS');
+
+var chStartDateTime;
+var chEndDateTime;
 
 var minX, maxX, minY, maxY = null;
 
@@ -23,7 +37,7 @@ var tempHack = 0;
 
 var hostUrl = window.location.origin;
 if (hostUrl == null){
-	var hostUrl = "http://ts20.billydasdev.com";
+    var hostUrl = "http://ts20.billydasdev.com";
 }
 
 
@@ -36,7 +50,23 @@ function initLines() {
 	updateGraph();
 }
 
-function updateGraph() {
+function updateGraph(liveUpdateTimer = null) {
+	//color = null;
+	// persistentSelection = null;
+	// minX = null;
+	// maxX = null;
+	//mostRecentDateTime = backupStart;
+
+	//backupStart = startDateTime;
+	//backupEnd = endDateTime;
+
+
+
+	clearInterval(interval);
+	liveDataCache = [];
+
+
+
 	tempHack = 0;
 	// TODO: these are subject to change, but are temporary and needed for loading img
 
@@ -60,36 +90,52 @@ function updateGraph() {
 	var svg = d3.select(chartDiv).select("svg");
 	var focus = d3.select(focusDiv).select("svg");
 
-	var xAxisIds = xAxisDataId;
-	
-	if (xAxisIds == "Time") {
-		xAxisIds = "";
-	}
 
-	// list of sensors available
-	var yAxisIds = yAxisDataId;
 
-	// format strings for use in GET request
-	for (var i = 0; i < yAxisIds.length; i++) {
-		if (!yAxisIds[i].includes('"')){
-			yAxisIds[i] = '"' + yAxisIds[i] + '"';
+	function fetchAllData() {
+		if (!firstUpdate) {
+			//mostRecentDateTime is the most recent date from the existing contents of lineData.
+			chStartDateTime = mostRecentDateTime;
+			//moment() is right now
+			chEndDateTime = moment().format("YYYY-MM-DDTHH:mm:ss.SSSS");
+		} else {
+			chStartDateTime = startDateTime
+			chEndDateTime = endDateTime
+
+			//startDateTime = backupStart;
+			//endDateTime = backupEnd;
 		}
-	}
 
-	if (xAxisIds != "")
-	{
-		xAxisIds = '"' + xAxisIds + '"';
-	}
+		var xAxisIds = xAxisDataId;
 	
+		if (xAxisIds == "Time") {
+			xAxisIds = "";
+		}
+	
+		// list of sensors available
+		var yAxisIds = yAxisDataId;
+	
+		// format strings for use in GET request
+		for (var i = 0; i < yAxisIds.length; i++) {
+			if (!yAxisIds[i].includes('"')){
+				yAxisIds[i] = '"' + yAxisIds[i] + '"';
+			}
+		}
+	
+		if (xAxisIds != "")
+		{
+			xAxisIds = '"' + xAxisIds + '"';
+		}
+		
+	
+		var url = hostUrl + ":3000/data?canId=["
+			+ yAxisIds.toString()
+			+ "]&startTime='" + chStartDateTime
+			+ "'&endTime='" + chEndDateTime + "'"
+			+ "&max=200000";
 
-	var url = hostUrl + ":3000/data?canId=["
-		+ yAxisIds.toString()
-		+ "]&startTime='" + startDateTime
-		+ "'&endTime='" + endDateTime + "'"
-		+ "&max=200000";
-
-	// load the dataset and then draw
-	fetch(url)
+		// load the dataset and then draw
+		fetch(url)
 		.then(response => response.json())
 		.then(lineData => {
 			// data conversion for time and data
@@ -97,6 +143,18 @@ function updateGraph() {
 				d.UTCTimestamp = Date.parse(d.UTCTimestamp);
 				d.Data = parseFloat(d.Data);
 			})
+
+			if (liveUpdateTimer != null) {
+				
+				liveDataCache = lineData.concat(liveDataCache)
+
+				//stores most recent date from linedata for live updating
+				let newDate = new Date(Math.max.apply(null, lineData.map(function(e) {
+					return new Date(e.UTCTimestamp);
+					})))
+				newDate.setMilliseconds(newDate.getMilliseconds() + 1); //add 1 ms to prevent the old data from getting picked up again
+				mostRecentDateTime = moment(newDate).utc().format("YYYY-MM-DDTHH:mm:ss.SSSS");
+			}		
 
 			let xAxisData = null;
 			url = hostUrl + ":3000/desc?canId=[" + yAxisIds.toString() + "]"
@@ -116,8 +174,8 @@ function updateGraph() {
 					if (xAxisIds != "") {
 						var url = hostUrl + ":3000/data?canId=["
 						+ xAxisIds.toString()
-						+ "]&startTime='" + startDateTime
-						+ "'&endTime='" + endDateTime + "'"
+						+ "]&startTime='" + chStartDateTime
+						+ "'&endTime='" + chEndDateTime + "'"
 						+ "&max=200000";
 
 						fetch(url)
@@ -141,18 +199,34 @@ function updateGraph() {
 										// hide loading graphic
 										loading.style("display", "none");
 										
-										// draw line chart
-										lineChart(lineData, svg, xAxisData, firstUpdate);
-										focusChart(lineData, svg, focus, xAxisData);
-										
-										if (firstUpdate) {
-											// add listener to draw on resize
-											window.addEventListener("resize", function () {
-												lineChart(lineData, svg, xAxisData);
-												focusChart(lineData, svg, focus, xAxisData);
-											});
-											firstUpdate = false;
+										if (!liveDataCache.length) {
+											// draw line chart
+											lineChart(lineData, svg, xAxisData, firstUpdate);
+											focusChart(lineData, svg, focus, xAxisData);
+
+											if (firstUpdate) {
+												// add listener to draw on resize
+												window.addEventListener("resize", function () {
+													lineChart(lineData, svg, xAxisData);
+													focusChart(lineData, svg, focus, xAxisData);
+												});
+												firstUpdate = false;
+											}
+										} else {
+											// draw line chart
+											lineChart(liveDataCache, svg, xAxisData, firstUpdate);
+											focusChart(liveDataCache, svg, focus, xAxisData);
+
+											if (firstUpdate) {
+												// add listener to draw on resize
+												window.addEventListener("resize", function () {
+													lineChart(liveDataCache, svg, xAxisData);
+													focusChart(liveDataCache, svg, focus, xAxisData);
+												});
+												firstUpdate = false;
+											}
 										}
+										
 									})
 							});
 
@@ -160,17 +234,32 @@ function updateGraph() {
 						// hide loading graphic
 						loading.style("display", "none");
 						
-						// draw line chart
-						lineChart(lineData, svg, null, firstUpdate);
-						focusChart(lineData, svg, focus);
-						
-						if (firstUpdate) {
-							// add listener to draw on resize
-							window.addEventListener("resize", function () {
-								lineChart(lineData, svg);
-								focusChart(lineData, svg, focus);
-							});
-							firstUpdate = false;
+						if (!liveDataCache.length) {
+							// draw line chart
+							lineChart(lineData, svg, null, firstUpdate);
+							focusChart(lineData, svg, focus);
+							
+							if (firstUpdate) {
+								// add listener to draw on resize
+								window.addEventListener("resize", function () {
+									lineChart(lineData, svg);
+									focusChart(lineData, svg, focus);
+								});
+								firstUpdate = false;
+							}
+						} else {
+							// draw line chart
+							lineChart(liveDataCache, svg, null, firstUpdate);
+							focusChart(liveDataCache, svg, focus);
+							
+							if (firstUpdate) {
+								// add listener to draw on resize
+								window.addEventListener("resize", function () {
+									lineChart(liveDataCache, svg);
+									focusChart(liveDataCache, svg, focus);
+								});
+								firstUpdate = false;
+							}
 						}
 					}
 
@@ -185,6 +274,22 @@ function updateGraph() {
 			// log the caught error if failure to load database
 			console.log(error);
 		});
+	}
+
+	fetchAllData();
+	if (liveUpdateTimer != null) {
+		$("#liveToggles").css("display", "block");
+
+		interval = setInterval(() => {
+			// persistentSelection = null;
+			minX = null;
+			maxX = null;
+			fetchAllData();
+		}, liveUpdateTimer)
+	} else {
+		$("#liveToggles").css("display", "none");
+	}
+	
 }
 
 function lineChart(data, svg, xAxisData = null, firstUpdate = false) {
@@ -388,11 +493,14 @@ function lineChart(data, svg, xAxisData = null, firstUpdate = false) {
 
 	// create group names
 	var sensorNames = sumstat.map(function (d) { return d.key })
+	sensorNames.sort().reverse()
 
 	// create scale to map sensors to individual colour
-	var color = d3.scaleOrdinal()
-		.domain(sensorNames)
-		.range(d3.schemeCategory10);
+	//if (color == null) {
+		var color = d3.scaleOrdinal()
+			.domain(sensorNames)
+			.range(d3.schemeCategory10);
+	//}
 
 	// sorry
 	let yAxisPadder = 0;
@@ -754,16 +862,27 @@ function focusChart(data, svg, focus, xAxisData = null) {
 
 		// create group names
 		var sensorNames = sumstat.map(function (d) { return d.key })
+		sensorNames.sort().reverse()
 
 		// create scale to map sensors to individual colour
-		var color = d3.scaleOrdinal()
-			.domain(sensorNames)
-			.range(d3.schemeCategory10);
+		//if (color == null) {
+			var color = d3.scaleOrdinal()
+				.domain(sensorNames)
+				.range(d3.schemeCategory10);
+		//}
 
 		const brush = d3.brushX()
 			//.extent([[dynamicPaddingLeft, 0.5], [w - padding, focusHeight + 0.5]])
 			
-			.extent([[dynamicPaddingLeft, 0.5], [dynamicPaddingLeft + d3.select('.domain').node().getBoundingClientRect().width, focusHeight + 0.5]])
+			.extent([[dynamicPaddingLeft, 0.5], 
+				[
+					
+					dynamicPaddingLeft + 
+					d3.select('#chartClip').node().getBoundingClientRect().width, 
+
+					//d3.select('.domain').node().getBoundingClientRect().width
+					focusHeight + 0.5]
+			])
 			.on("brush", brushed)
 			.on("end", brushended);
 
@@ -853,10 +972,15 @@ function focusChart(data, svg, focus, xAxisData = null) {
 		const gb = focus.append("g")
 			.call(brush)
 
-		if (persistentSelection === null) {
+		if (persistentSelection == null) {
 			gb.call(brush.move, defaultSelection);
 		} else {
-			gb.call(brush.move, [xScale(persistentSelection[0]), xScale(persistentSelection[1])])
+			if (!liveDataCache.length || !rightLocked) {
+				gb.call(brush.move, [xScale(persistentSelection[0]), xScale(persistentSelection[1])])
+			} else {
+				gb.call(brush.move, [xScale(persistentSelection[0]), defaultSelection[1]])
+			}
+			
 		}
 
 	function brushed() {
@@ -908,9 +1032,30 @@ function focusChart(data, svg, focus, xAxisData = null) {
 			}
 		}
 	}
+
+	if (liveDataCache.length) {
+		var b = focus.select('.brush');
+		b.selectAll('.resize').remove();
+		b.selectAll('.background').remove();
+		//brush.event(b);
+	} else {
+		gb.call(brush.move, defaultSelection);
+	}
 }
 
 // run init on window load
 $(document).ready(function () {
+	$("#btnLockR").click(() => {
+		$("#btnLockR").css("display", "none");
+		$("#btnUnlockR").css("display", "block");
+		rightLocked = true;
+	})
+
+	$("#btnUnlockR").click(() => {
+		$("#btnUnlockR").css("display", "none");
+		$("#btnLockR").css("display", "block");
+		rightLocked = false;
+	})
+
 	initLines();
 });
